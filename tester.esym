@@ -1,0 +1,63 @@
+D G "__PCM__" 2 56 ""5.007""
+D G "__DEVICE__" 2 56 ""
+D G "__DATE__" 2 56 ""16-jul.-15""
+D G "__TIME__" 2 56 ""18:39:09"" "#define VERS "v1.0a"//version del firm"
+D G "LCD_rst" 0 4 "PIN_A6"
+D G "LCD_dc" 0 6 "PIN_A7" "DC"
+D G "LCD_sda" 0 7 "PIN_A0" "DIN"
+D G "LCD_sclk" 0 8 "PIN_A1" "B5//CLK"
+D G "J1_UP" 0 10 "PIN_B3" "pulsadores INIT"
+D G "J1_DOWN" 0 11 "PIN_B2" "modo"
+D G "J2_UP" 0 12 "PIN_B1" "contraste -"
+D G "J2_DOWN" 0 13 "PIN_B0" "contraste +"
+D G "MODE_INVERSO" 0 16 "1"
+D G "MODE_ALL_ON" 0 17 "2"
+D G "MODE_ALL_OFF" 0 18 "3"
+D G "VERSION" 0 19 ""v1.1""
+D G "VELOCIDAD_PALAS" 0 21 "3"
+D G "LARGO_PALAS_FACIL" 0 23 "16"
+D G "LARGO_PALAS_MEDIO" 0 24 "10"
+D G "LARGO_PALAS_DIFICIL" 0 25 "5"
+D G "ANCHO_PALAS_FACIL" 0 27 "4"
+D G "ANCHO_PALAS_MEDIO" 0 28 "3"
+D G "ANCHO_PALAS_DIFICIL" 0 29 "3"
+D G "PERIMETRO_BOLA_FACIL" 0 31 "6"
+D G "PERIMETRO_BOLA_MEDIO" 0 32 "4"
+D G "PERIMETRO_BOLA_DIFICIL" 0 33 "3"
+D G "VELOCIDAD_BOLA_FACIL" 0 35 "1"
+D G "VELOCIDAD_BOLA_MEDIO" 0 36 "2"
+D G "VELOCIDAD_BOLA_DIFICIL" 0 37 "3"
+D G "VELOCIDAD_IA_FACIL" 0 39 "1"
+D G "VELOCIDAD_IA_MEDIO" 0 40 "2"
+D G "VELOCIDAD_IA_DIFICIL" 0 41 "4"
+V G "contraste" 0 43 "int8" `38 
+D G "high_LCD_dc" 2 39 "output_high(LCD_dc)"
+D G "high_LCD_cs" 2 40 "output_high(LCD_cs)"
+D G "high_LCD_sda" 2 41 "output_high(LCD_sda);"
+D G "high_LCD_sclk" 2 42 "output_high(LCD_sclk);"
+D G "high_LCD_rst" 2 43 "output_high(LCD_rst);"
+D G "low_LCD_dc" 2 45 "output_low(LCD_dc)"
+D G "low_LCD_cs" 2 46 "output_low(LCD_cs)"
+D G "low_LCD_sda" 2 47 "output_low(LCD_sda);"
+D G "low_LCD_sclk" 2 48 "output_low(LCD_sclk);"
+D G "low_LCD_rst" 2 49 "output_low(LCD_rst);"
+D G "LCD_DISPLAY_ALL_ON" 2 51 "0b00001001" "Independientemente del contenido de la DDRAM activa todos los pixeles"
+D G "LCD_DISPLAY_ALL_OFF" 2 52 "0b00001000" "Independientemente del contenido de la DDRAM desactiva todos los pixeles"
+D G "LCD_DISPLAY_NORMAL" 2 53 "0b00001100" "Muestra el contenido de la DDRAM en la pantalla"
+D G "LCD_DISPLAY_INVERSE" 2 54 "0b00001101" "Muestra el contenido de la DDRAM en la pantalla en contraste inverso"
+F B "delay_ms" 1 0
+F B "delay_us" 1 0
+F B "delay_ms" 1 0
+F B "delay_us" 1 0
+F B "delay_ms" 1 0
+F B "delay_us" 1 0
+F B "delay_ms" 1 0
+F B "delay_us" 1 0
+F B "delay_ms" 1 0
+F B "delay_us" 1 0
+F B "delay_ms" 1 0
+F B "delay_us" 1 0
+F B "delay_ms" 1 0
+F B "delay_us" 1 0
+F B "delay_ms" 1 0
+F B "delay_us" 1 0

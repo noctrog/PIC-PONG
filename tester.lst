@@ -1,0 +1,2243 @@
+CCS PCM C Compiler, Version 4.104, 5967               16-jul.-15 18:32
+
+               Filename: C:\Users\Admin\Desktop\5110LCDtesterSource\tester.lst
+
+               ROM used: 1997 words (98%)
+                         Largest free fragment is 51
+               RAM used: 22 (10%) at main() level
+                         75 (33%) worst case
+               Stack:    5 locations
+
+*
+0000:  MOVLW  04
+0001:  MOVWF  0A
+0002:  GOTO   408
+0003:  NOP
+.................... #include <tester.h> 
+.................... #include <16F628A.h> 
+.................... //////// Standard Header file for the PIC16F628A device //////////////// 
+.................... #device PIC16F628A 
+.................... #list 
+....................  
+....................  
+.................... #FUSES NOWDT                    //No Watch Dog Timer 
+.................... #FUSES PUT                      //Power Up Timer 
+.................... #FUSES INTRC_IO                 //Internal RC Osc, no CLKOUT 
+.................... #FUSES NOMCLR                   //Master Clear pin used for I/O 
+.................... #FUSES NOBROWNOUT               //No brownout reset 
+.................... #FUSES NOLVP                    //No low voltage prgming, B3(PIC16) or B5(PIC18) used for I/O 
+....................  
+.................... #use delay(int=4000000) 
+*
+0287:  MOVLW  5F
+0288:  MOVWF  04
+0289:  BCF    03.7
+028A:  MOVF   00,W
+028B:  BTFSC  03.2
+028C:  GOTO   29B
+028D:  MOVLW  01
+028E:  MOVWF  78
+028F:  CLRF   77
+0290:  DECFSZ 77,F
+0291:  GOTO   290
+0292:  DECFSZ 78,F
+0293:  GOTO   28F
+0294:  MOVLW  4A
+0295:  MOVWF  77
+0296:  DECFSZ 77,F
+0297:  GOTO   296
+0298:  GOTO   299
+0299:  DECFSZ 00,F
+029A:  GOTO   28D
+029B:  RETURN
+....................  
+....................  
+....................  
+....................  
+....................  
+.................... //#define VERS "v1.0a"//version del firm 
+....................  
+.................... #define LCD_rst   PIN_A6 
+.................... //#define nok_cs       PIN_A0//CE 
+.................... #define LCD_dc    PIN_A7//DC 
+.................... #define LCD_sda   PIN_A0//DIN 
+.................... #define LCD_sclk  PIN_A1//B5//CLK 
+....................  
+.................... #define J1_UP PIN_B3 //pulsadores INIT 
+.................... #define J1_DOWN  PIN_B2 //modo  
+.................... #define J2_UP  PIN_B1 //contraste - 
+.................... #define J2_DOWN PIN_B0 //contraste + 
+....................  
+.................... //#DEFINE MODE_NORMAL 0 
+.................... #DEFINE MODE_INVERSO 1 
+.................... #DEFINE MODE_ALL_ON 2 
+.................... #DEFINE MODE_ALL_OFF 3 
+.................... #DEFINE VERSION "v1.1" 
+....................  
+.................... #define VELOCIDAD_PALAS 3 
+....................  
+.................... #define LARGO_PALAS_FACIL 16 
+.................... #define LARGO_PALAS_MEDIO 10 
+.................... #define LARGO_PALAS_DIFICIL 5 
+....................  
+.................... #define ANCHO_PALAS_FACIL 4 
+.................... #define ANCHO_PALAS_MEDIO 3 
+.................... #define ANCHO_PALAS_DIFICIL 3 
+....................  
+.................... #define PERIMETRO_BOLA_FACIL 6 
+.................... #define PERIMETRO_BOLA_MEDIO 4 
+.................... #define PERIMETRO_BOLA_DIFICIL 3 
+....................  
+.................... #define VELOCIDAD_BOLA_FACIL 1 
+.................... #define VELOCIDAD_BOLA_MEDIO 2 
+.................... #define VELOCIDAD_BOLA_DIFICIL 3 
+....................  
+.................... #define VELOCIDAD_IA_FACIL 1 
+.................... #define VELOCIDAD_IA_MEDIO 2 
+.................... #define VELOCIDAD_IA_DIFICIL 4 
+....................  
+.................... unsigned int8 contraste=70; 
+.................... #include "PCD8544_LCDdriverV1_1.c" 
+.................... //////MODIFOCADA PARA ESTE CASOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOOO 
+.................... //////////////////PCD8544 LCD driver. v1.1 by villamany//////////////////// 
+.................... //Libreria para LCDs basados en controladores PCD8544 de 84 x 48 pixeles  
+.................... //monocromaticos, que son los utilizados por los Nokia 5110, 3110... 
+....................  
+.................... /* 
+.................... //El pin del backlight se conecta a masa. (Tambien se prodria conrolar via PWM) 
+....................  
+.................... Definir los siguientes salidas en el programa principal, si alguno no se va a usar, 
+.................... basta con no definirlo. 
+.................... #define LCD_sda   PIN_A3//DIN. Necesario 
+.................... #define LCD_sclk  PIN_A4//CLK. Necesario 
+.................... #define LCD_dc    PIN_A2//DC. Necesario 
+.................... #define LCD_rst   PIN_A5//Necesario. Si solo se va a inicializar una vez 
+.................... //                         se podria conectar a algun autorreset existente (tipo  
+.................... //                         reistencia elevada-condensador), el 
+.................... //                         requisito es estar a nivel bajo unos 30ms tras dar  
+.................... //                         alimentacion, luego debe pasar a nivel alto 
+.................... #define LCD_cs    PIN_A1//CE //Opcional. Se puede dejar conectado a masa si no  
+.................... //                           se va a usar otro dispositivo que comparta los 
+.................... //                           pines de comunicacion. 
+.................... */ 
+....................  
+.................... /* 
+.................... //Si se quiere ajustar el contraste, utilizar la funcion LCD_setContrast (valor) 
+.................... , valor debe ser de 0 a 127, durante la inicializacion se setea a "LCD_DEFAULT_CONTRAST", 
+.................... 62 que es lo habitual cuando se alimenta a 3.3v. 
+.................... */ 
+....................  
+....................  
+.................... /*Si se quiere usar el LCD en modo direccionamiento vertical, descomentar la linea  
+.................... "#define LCD_USE_VERTICAL_ADDR 0b00000010"*/ 
+....................  
+.................... //#define LCD_USE_VERTICAL_ADDR 0b00000010 
+....................  
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... #define  high_LCD_dc    output_high(LCD_dc) 
+.................... #define  high_LCD_cs    output_high(LCD_cs) 
+.................... #define  high_LCD_sda   output_high(LCD_sda); 
+.................... #define  high_LCD_sclk  output_high(LCD_sclk); 
+.................... #define  high_LCD_rst  output_high(LCD_rst); 
+....................  
+.................... #define  low_LCD_dc     output_low(LCD_dc) 
+.................... #define  low_LCD_cs     output_low(LCD_cs) 
+.................... #define  low_LCD_sda    output_low(LCD_sda); 
+.................... #define  low_LCD_sclk   output_low(LCD_sclk); 
+.................... #define  low_LCD_rst   output_low(LCD_rst); 
+....................  
+.................... #define LCD_DISPLAY_ALL_ON 0b00001001 //Independientemente del contenido de la DDRAM activa todos los pixeles 
+.................... #define LCD_DISPLAY_ALL_OFF 0b00001000 //Independientemente del contenido de la DDRAM desactiva todos los pixeles 
+.................... #define LCD_DISPLAY_NORMAL 0b00001100 //Muestra el contenido de la DDRAM en la pantalla 
+.................... #define LCD_DISPLAY_INVERSE 0b00001101 //Muestra el contenido de la DDRAM en la pantalla en contraste inverso 
+....................  
+.................... char charsel,charpos,chardata; 
+.................... char lcdx, lcdy;     // usado por la escritura de caracteres de mas de 8 pixel de altura (no usado si se utiliza solo la fuente contenida en esta libreria) 
+.................... int8 byteCount,nbytesToWrite; 
+....................  
+.................... //fuente standard de 6x8 (5x8 mas un espacio=6x8) 
+.................... int8 const font5x8t1[240]= 
+....................   { 
+....................   0x00,0x00,0x00,0x00,0x00,   // 20 space          ASCII table for LCD: 96 rows * 5 bytes= 480 bytes 
+....................   0x00,0x00,0x5f,0x00,0x00,   // 21 ! 
+....................   0x00,0x07,0x00,0x07,0x00,   // 22 " 
+....................   0x14,0x7f,0x14,0x7f,0x14,   // 23 # 
+....................   0x24,0x2a,0x7f,0x2a,0x12,   // 24 $ 
+....................   0x23,0x13,0x08,0x64,0x62,   // 25 % 
+....................   0x36,0x49,0x55,0x22,0x50,   // 26 & 
+....................   0x00,0x05,0x03,0x00,0x00,   // 27 ' 
+....................   0x00,0x1c,0x22,0x41,0x00,   // 28 ( 
+....................   0x00,0x41,0x22,0x1c,0x00,   // 29 ) 
+....................   0x14,0x08,0x3e,0x08,0x14,   // 2a * 
+....................   0x08,0x08,0x3e,0x08,0x08,   // 2b + 
+....................   0x00,0x50,0x30,0x00,0x00,   // 2c , 
+....................   0x08,0x08,0x08,0x08,0x08,   // 2d - 
+....................   0x00,0x60,0x60,0x00,0x00,   // 2e . 
+....................   0x20,0x10,0x08,0x04,0x02,   // 2f / 
+....................   0x3e,0x51,0x49,0x45,0x3e,   // 30 0 
+....................   0x00,0x42,0x7f,0x40,0x00,   // 31 1 
+....................   0x42,0x61,0x51,0x49,0x46,   // 32 2 
+....................   0x21,0x41,0x45,0x4b,0x31,   // 33 3 
+....................   0x18,0x14,0x12,0x7f,0x10,   // 34 4 
+....................   0x27,0x45,0x45,0x45,0x39,   // 35 5 
+....................   0x3c,0x4a,0x49,0x49,0x30,   // 36 6 
+....................   0x01,0x71,0x09,0x05,0x03,   // 37 7 
+....................   0x36,0x49,0x49,0x49,0x36,   // 38 8 
+....................   0x06,0x49,0x49,0x29,0x1e,   // 39 9 
+....................   0x00,0x36,0x36,0x00,0x00,   // 3a : 
+....................   0x00,0x56,0x36,0x00,0x00,   // 3b ; 
+....................   0x08,0x14,0x22,0x41,0x00,   // 3c < 
+....................   0x14,0x14,0x14,0x14,0x14,   // 3d = 
+....................   0x00,0x41,0x22,0x14,0x08,   // 3e > 
+....................   0x02,0x01,0x51,0x09,0x06,   // 3f ? 
+....................   0x32,0x49,0x79,0x41,0x3e,   // 40 @ 
+....................   0x7e,0x11,0x11,0x11,0x7e,   // 41 A 
+....................   0x7f,0x49,0x49,0x49,0x36,   // 42 B 
+....................   0x3e,0x41,0x41,0x41,0x22,   // 43 C 
+....................   0x7f,0x41,0x41,0x22,0x1c,   // 44 D 
+....................   0x7f,0x49,0x49,0x49,0x41,   // 45 E 
+....................   0x7f,0x09,0x09,0x09,0x01,   // 46 F 
+....................   0x3e,0x41,0x49,0x49,0x7a,   // 47 G 
+....................   0x7f,0x08,0x08,0x08,0x7f,   // 48 H 
+....................   0x00,0x41,0x7f,0x41,0x00,   // 49 I 
+....................   0x20,0x40,0x41,0x3f,0x01,   // 4a J 
+....................   0x7f,0x08,0x14,0x22,0x41,   // 4b K 
+....................   0x7f,0x40,0x40,0x40,0x40,   // 4c L 
+....................   0x7f,0x02,0x0c,0x02,0x7f,   // 4d M 
+....................   0x7f,0x04,0x08,0x10,0x7f,   // 4e N 
+....................   0x3e,0x41,0x41,0x41,0x3e    // 4f O 
+.................... }; 
+....................   
+.................... int8 const font5x8t2[240]=            { 
+....................   0x7f,0x09,0x09,0x09,0x06,   // 50 P 
+....................   0x3e,0x41,0x51,0x21,0x5e,   // 51 Q 
+....................   0x7f,0x09,0x19,0x29,0x46,   // 52 R 
+....................   0x46,0x49,0x49,0x49,0x31,   // 53 S 
+....................   0x01,0x01,0x7f,0x01,0x01,   // 54 T 
+....................   0x3f,0x40,0x40,0x40,0x3f,   // 55 U 
+....................   0x1f,0x20,0x40,0x20,0x1f,   // 56 V 
+....................   0x3f,0x40,0x38,0x40,0x3f,   // 57 W 
+....................   0x63,0x14,0x08,0x14,0x63,   // 58 X 
+....................   0x07,0x08,0x70,0x08,0x07,   // 59 Y 
+....................   0x61,0x51,0x49,0x45,0x43,   // 5a Z 
+....................   0x00,0x7f,0x41,0x41,0x00,   // 5b [ 
+....................   0x02,0x04,0x08,0x10,0x20,   // 5c 
+....................   0x00,0x41,0x41,0x7f,0x00,   // 5d 
+....................   0x04,0x02,0x01,0x02,0x04,   // 5e 
+....................   0x40,0x40,0x40,0x40,0x40,   // 5f 
+....................   0x00,0x01,0x02,0x04,0x00,   // 60 
+....................   0x20,0x54,0x54,0x54,0x78,   // 61 a 
+....................   0x7f,0x48,0x44,0x44,0x38,   // 62 b 
+....................   0x38,0x44,0x44,0x44,0x20,   // 63 c 
+....................   0x38,0x44,0x44,0x48,0x7f,   // 64 d 
+....................   0x38,0x54,0x54,0x54,0x18,   // 65 e 
+....................   0x08,0x7e,0x09,0x01,0x02,   // 66 f 
+....................   0x0c,0x52,0x52,0x52,0x3e,   // 67 g 
+....................   0x7f,0x08,0x04,0x04,0x78,   // 68 h 
+....................   0x00,0x44,0x7d,0x40,0x00,   // 69 i 
+....................   0x20,0x40,0x44,0x3d,0x00,   // 6a j 
+....................   0x7f,0x10,0x28,0x44,0x00,   // 6b k 
+....................   0x00,0x41,0x7f,0x40,0x00,   // 6c l 
+....................   0x7c,0x04,0x18,0x04,0x78,   // 6d m 
+....................   0x7c,0x08,0x04,0x04,0x78,   // 6e n 
+....................   0x38,0x44,0x44,0x44,0x38,   // 6f o 
+....................   0x7c,0x14,0x14,0x14,0x08,   // 70 p 
+....................   0x08,0x14,0x14,0x18,0x7c,   // 71 q 
+....................   0x7c,0x08,0x04,0x04,0x08,   // 72 r 
+....................   0x48,0x54,0x54,0x54,0x20,   // 73 s 
+....................   0x04,0x3f,0x44,0x40,0x20,   // 74 t 
+....................   0x3c,0x40,0x40,0x20,0x7c,   // 75 u 
+....................   0x1c,0x20,0x40,0x20,0x1c,   // 76 v 
+....................   0x3c,0x40,0x30,0x40,0x3c,   // 77 w 
+....................   0x44,0x28,0x10,0x28,0x44,   // 78 x 
+....................   0x0c,0x50,0x50,0x50,0x3c,   // 79 y 
+....................   0x44,0x64,0x54,0x4c,0x44,   // 7a z 
+....................   0x00,0x08,0x36,0x41,0x00,   // 7b 
+....................   0x00,0x00,0x7f,0x00,0x00,   // 7c 
+....................   0x00,0x41,0x36,0x08,0x00,   // 7d 
+....................   0x10,0x08,0x08,0x10,0x08,   // 7e 
+....................   0x78,0x46,0x41,0x46,0x78    // 7f 
+.................... }; 
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Envia un byte de datos al LCD para dibujarlo en la pantalla, inviertiendo 
+.................... el color de cada uno de los pixeles*/ 
+.................... void LCD_write_data_inv(char byteforLCD_data_inv) 
+.................... { 
+....................   char caa; 
+....................    high_LCD_dc; 
+*
+0384:  BSF    03.5
+0385:  BCF    05.7
+0386:  BCF    03.5
+0387:  BSF    05.7
+....................    #ifDef LCD_cs low_LCD_cs; #endIf  // chip enabled 
+....................    byteforLCD_data_inv =~ byteforLCD_data_inv; 
+0388:  COMF   62,F
+....................    for (caa=8;caa>0;caa--) 
+0389:  MOVLW  08
+038A:  MOVWF  63
+038B:  MOVF   63,F
+038C:  BTFSC  03.2
+038D:  GOTO   3A7
+....................    { 
+....................       low_LCD_sclk; 
+038E:  BSF    03.5
+038F:  BCF    05.1
+0390:  BCF    03.5
+0391:  BCF    05.1
+....................     if ((byteforLCD_data_inv & 0x80)==0) 
+0392:  MOVF   62,W
+0393:  ANDLW  80
+0394:  BTFSS  03.2
+0395:  GOTO   39B
+....................     { 
+....................        low_LCD_sda; 
+0396:  BSF    03.5
+0397:  BCF    05.0
+0398:  BCF    03.5
+0399:  BCF    05.0
+....................     } 
+....................     else 
+039A:  GOTO   39F
+....................        high_LCD_sda; 
+039B:  BSF    03.5
+039C:  BCF    05.0
+039D:  BCF    03.5
+039E:  BSF    05.0
+....................     high_LCD_sclk; 
+039F:  BSF    03.5
+03A0:  BCF    05.1
+03A1:  BCF    03.5
+03A2:  BSF    05.1
+....................     byteforLCD_data_inv = byteforLCD_data_inv<<1; 
+03A3:  BCF    03.0
+03A4:  RLF    62,F
+....................    } 
+03A5:  DECF   63,F
+03A6:  GOTO   38B
+.................... } 
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /* Subrutina de escritura serie. Utilizada internamente para enviar comandos o  
+.................... datos al LCD*/ 
+.................... void LCD_write_dorc(char byteforLCD)          
+.................... { 
+....................   char caa; 
+....................   for (caa=8;caa>0;caa--) 
+*
+029C:  MOVLW  08
+029D:  MOVWF  64
+029E:  MOVF   64,F
+029F:  BTFSC  03.2
+02A0:  GOTO   2BA
+....................   { 
+....................     low_LCD_sclk; 
+02A1:  BSF    03.5
+02A2:  BCF    05.1
+02A3:  BCF    03.5
+02A4:  BCF    05.1
+....................     if ((byteforLCD & 0x80)==0) 
+02A5:  MOVF   63,W
+02A6:  ANDLW  80
+02A7:  BTFSS  03.2
+02A8:  GOTO   2AE
+....................     { 
+....................          low_LCD_sda; 
+02A9:  BSF    03.5
+02AA:  BCF    05.0
+02AB:  BCF    03.5
+02AC:  BCF    05.0
+....................     } 
+....................     else 
+02AD:  GOTO   2B2
+....................          high_LCD_sda; 
+02AE:  BSF    03.5
+02AF:  BCF    05.0
+02B0:  BCF    03.5
+02B1:  BSF    05.0
+....................   
+....................     high_LCD_sclk; 
+02B2:  BSF    03.5
+02B3:  BCF    05.1
+02B4:  BCF    03.5
+02B5:  BSF    05.1
+....................     byteforLCD=byteforLCD<<1; 
+02B6:  BCF    03.0
+02B7:  RLF    63,F
+....................   } 
+02B8:  DECF   64,F
+02B9:  GOTO   29E
+.................... } 
+02BA:  RETURN
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Envia un byte de comandos al LCD. Utilizada Internamente*/ 
+.................... void LCD_write_data(char byteforLCD_data) 
+.................... { 
+....................   high_LCD_dc; 
+*
+0306:  BSF    03.5
+0307:  BCF    05.7
+0308:  BCF    03.5
+0309:  BSF    05.7
+....................   #ifDef LCD_cs low_LCD_cs; #endIf  // chip enabled 
+....................   LCD_write_dorc(byteforLCD_data); 
+030A:  MOVF   62,W
+030B:  MOVWF  63
+030C:  CALL   29C
+....................   #ifDef LCD_cs high_LCD_cs; #endIf  // chip disabled 
+.................... } 
+030D:  RETURN
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Envia un byte de comandos al LCD. Utilizada Internamente*/ 
+.................... void LCD_write_command(char byteforLCD_command) 
+.................... { 
+....................   low_LCD_dc; 
+*
+02BB:  BSF    03.5
+02BC:  BCF    05.7
+02BD:  BCF    03.5
+02BE:  BCF    05.7
+....................   #ifDef LCD_cs low_LCD_cs;#endIf 
+....................   LCD_write_dorc(byteforLCD_command); 
+02BF:  MOVF   61,W
+02C0:  MOVWF  63
+02C1:  CALL   29C
+....................   #ifDef LCD_cs high_LCD_cs; #endIf  // chip disabled 
+.................... } 
+02C2:  RETURN
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Setea el cursor en la coordenada X,Y indicada*/ 
+.................... void LCD_gotoxy(int8 xLCD, int8 yLCD)    
+.................... { 
+....................   LCD_write_command(0x40|(yLCD & 0x07));   // Y axe initialisation: 0100 0yyy 
+*
+02F5:  MOVF   5F,W
+02F6:  ANDLW  07
+02F7:  IORLW  40
+02F8:  MOVWF  60
+02F9:  MOVWF  61
+02FA:  CALL   2BB
+....................   LCD_write_command(0x80|(xLCD & 0x7f));   // X axe initialisation: 1xxx xxxx 
+02FB:  MOVF   5E,W
+02FC:  ANDLW  7F
+02FD:  IORLW  80
+02FE:  MOVWF  60
+02FF:  MOVWF  61
+0300:  CALL   2BB
+....................   //igualar cursores 
+....................   lcdx=xLCD; 
+0301:  MOVF   5E,W
+0302:  MOVWF  24
+....................   lcdy=yLCD; 
+0303:  MOVF   5F,W
+0304:  MOVWF  25
+.................... } 
+0305:  RETURN
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... void table_to_LCD(int1 mode)   // extract ascii from tables & write to LCD 
+.................... { 
+....................   if (charsel<0x20)return; 
+*
+0349:  MOVF   21,W
+034A:  SUBLW  1F
+034B:  BTFSC  03.0
+034C:  GOTO   3B2
+....................   if (charsel>0x7f)return; 
+034D:  MOVF   21,W
+034E:  SUBLW  7F
+034F:  BTFSS  03.0
+0350:  GOTO   3B2
+....................   for (byteCount=0;byteCount<5;byteCount++) 
+0351:  CLRF   26
+0352:  MOVF   26,W
+0353:  SUBLW  04
+0354:  BTFSS  03.0
+0355:  GOTO   3A9
+....................   { 
+....................     if (charsel<0x50) 
+0356:  MOVF   21,W
+0357:  SUBLW  4F
+0358:  BTFSS  03.0
+0359:  GOTO   369
+....................     {       
+....................       charpos=((charsel-0x20)*5); 
+035A:  MOVLW  20
+035B:  SUBWF  21,W
+035C:  MOVWF  63
+035D:  MOVWF  64
+035E:  MOVLW  05
+035F:  MOVWF  65
+0360:  CALL   324
+0361:  MOVF   78,W
+0362:  MOVWF  22
+....................       chardata=font5x8t1[(charpos+byteCount)]; 
+0363:  MOVF   26,W
+0364:  ADDWF  22,W
+0365:  CALL   004
+0366:  MOVWF  78
+0367:  MOVWF  23
+....................     }            // use font5x8t1 
+....................     else 
+0368:  GOTO   37B
+....................        if (charsel>0x4f) 
+0369:  MOVF   21,W
+036A:  SUBLW  4F
+036B:  BTFSC  03.0
+036C:  GOTO   37B
+....................        { 
+....................           charpos=((charsel-0x50)*5); 
+036D:  MOVLW  50
+036E:  SUBWF  21,W
+036F:  MOVWF  63
+0370:  MOVWF  64
+0371:  MOVLW  05
+0372:  MOVWF  65
+0373:  CALL   324
+0374:  MOVF   78,W
+0375:  MOVWF  22
+....................           chardata=font5x8t2[(charpos+byteCount)]; 
+0376:  MOVF   26,W
+0377:  ADDWF  22,W
+0378:  CALL   0F8
+0379:  MOVWF  78
+037A:  MOVWF  23
+....................        }            // use font5x8t2 
+....................     if (!mode) 
+037B:  MOVF   61,F
+037C:  BTFSS  03.2
+037D:  GOTO   382
+....................     { 
+....................       LCD_write_data(chardata);      // send data to LCD 
+037E:  MOVF   23,W
+037F:  MOVWF  62
+0380:  CALL   306
+....................     } 
+....................     else 
+0381:  GOTO   3A7
+....................     { 
+....................       LCD_write_data_inv(chardata);      // send data to LCD 
+0382:  MOVF   23,W
+0383:  MOVWF  62
+....................     } 
+....................   } 
+*
+03A7:  INCF   26,F
+03A8:  GOTO   352
+....................   if (!mode)//añadir un pixel de espacio despues del caracter 
+03A9:  MOVF   61,F
+03AA:  BTFSS  03.2
+03AB:  GOTO   3AF
+....................       LCD_write_data(0x00); 
+03AC:  CLRF   62
+03AD:  CALL   306
+....................   else 
+03AE:  GOTO   3B2
+....................       LCD_write_data(0xff); 
+03AF:  MOVLW  FF
+03B0:  MOVWF  62
+03B1:  CALL   306
+.................... } 
+03B2:  RETURN
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Dibuja un caracter estandard en el LCD*/ 
+.................... void LCD_printchar(int8 cvar)   
+.................... { 
+....................    charsel=cvar; 
+*
+03B9:  MOVF   60,W
+03BA:  MOVWF  21
+....................    table_to_LCD(0); 
+03BB:  CLRF   61
+03BC:  CALL   349
+.................... } 
+03BD:  RETURN
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Dibuja un caracter estandard en el LCD invirtiendo su color*/ 
+.................... void LCD_printchar_inv(int8 cvar) 
+.................... { 
+....................    charsel=cvar; 
+*
+03B3:  MOVF   4C,W
+03B4:  MOVWF  21
+....................    table_to_LCD(1); 
+03B5:  MOVLW  01
+03B6:  MOVWF  61
+03B7:  CALL   349
+.................... } 
+03B8:  RETURN
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Borra una linea del LCD*/ 
+.................... void LCD_erase_y(int8 yLCD) 
+.................... { 
+....................    LCD_gotoxy(0,yLCD); 
+....................    printf(LCD_printchar,"              "); 
+.................... } 
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Borra una columna del LCD*/ 
+.................... void LCD_erase_x(int8 xLCD) 
+.................... { 
+....................   char column; 
+....................   for (column=0;column!=6;column++) 
+....................   { 
+....................     LCD_gotoxy(xLCD,column); 
+....................     LCD_write_data(0x00); 
+....................     LCD_write_data(0x00); 
+....................     LCD_write_data(0x00); 
+....................     LCD_write_data(0x00); 
+....................     LCD_write_data(0x00); 
+....................     LCD_write_data(0x00); 
+....................   } 
+.................... } 
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Borra la pantalla del LCD*/ 
+.................... void LCD_clear_screen() 
+.................... { 
+....................    int16 n; 
+....................    LCD_gotoxy(0,0); 
+*
+030E:  CLRF   5E
+030F:  CLRF   5F
+0310:  CALL   2F5
+....................    for (n=0;n<504;n++) LCD_write_data (0x00);//84 pixel x 6 lineas=504  
+0311:  CLRF   4C
+0312:  CLRF   4B
+0313:  MOVF   4C,W
+0314:  SUBLW  01
+0315:  BTFSS  03.0
+0316:  GOTO   323
+0317:  BTFSS  03.2
+0318:  GOTO   31D
+0319:  MOVF   4B,W
+031A:  SUBLW  F7
+031B:  BTFSS  03.0
+031C:  GOTO   323
+031D:  CLRF   62
+031E:  CALL   306
+031F:  INCF   4B,F
+0320:  BTFSC  03.2
+0321:  INCF   4C,F
+0322:  GOTO   313
+.................... } 
+0323:  RETURN
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /* 
+.................... Setear el contraste 
+.................... Contraste seteable por medio de Vop (tension de operacion del LCD), que es ajustable 
+.................... de 3.06v a 10.68v (0 a 127 en valor decimal)(0=3.06 y 127=10.68) (valor de 61 esta bien para 
+.................... inicializar funcionando a 3.3v que equivalen a 6,72v. 
+.................... ATENCION: El datasheet recomienda no siperar el valor de 8.5v para Vop, el cual 
+.................... equivale a un valor de 90*/ 
+.................... void LCD_setContrast(int8 valor) 
+.................... { 
+*
+02E5:  MOVLW  21
+02E6:  MOVWF  4C
+....................    int8 aux=0b00100001; 
+....................    #ifDef LCD_USE_VERTICAL_ADDR aux=aux| LCD_USE_VERTICAL_ADDR; #endIf 
+....................    LCD_write_command(aux);//entrar en modo instrucciones extendidas 
+02E7:  MOVF   4C,W
+02E8:  MOVWF  61
+02E9:  CALL   2BB
+....................    LCD_write_command(0b10000000|valor);//ajustar contraste 
+02EA:  MOVF   4B,W
+02EB:  IORLW  80
+02EC:  MOVWF  4D
+02ED:  MOVWF  61
+02EE:  CALL   2BB
+....................    aux=0b00100000; 
+02EF:  MOVLW  20
+02F0:  MOVWF  4C
+....................    #ifDef  LCD_USE_VERTICAL_ADDR aux=aux| LCD_USE_VERTICAL_ADDR; #endIf 
+....................    LCD_write_command(aux);//volver al modo instrucciones normales 
+02F1:  MOVF   4C,W
+02F2:  MOVWF  61
+02F3:  CALL   2BB
+.................... } 
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Cambia entre los siguientes modos de funcionamiento: 
+.................... LCD_LCD_DISPLAY_ALL_ON 0b00001001 //Independientemente del contenido de la DDRAM activa todos los pixeles 
+.................... DISPLAY_ALL_OFF 0b00001000 //Independientemente del contenido de la DDRAM desactiva todos los pixeles 
+.................... LCD_DISPLAY_NORMAL 0b00001100 //Muestra el contenido de la DDRAM en la pantalla 
+.................... LCD_DISPLAY_INVERSE 0b00001101 //Muestra el contenido de la DDRAM en la pantalla en contraste inverso 
+.................... LCD_Para restaurarlo hay que llamar a "LCD_ScreenNormal()"*/ 
+.................... void LCD_SetDisplay(INT8 DISPLAYMODE) 
+.................... { 
+....................    LCD_write_command(DISPLAYMODE);     
+.................... } 
+.................... /*-----------------------------------------------------------------------------*/ 
+.................... /*Inicializa el LCD. Debe llamarse al iniciar el programa principal*/ 
+.................... void LCD_init() 
+.................... { 
+....................     
+....................    #ifDef LCD_rst low_LCD_rst;#endIf 
+*
+02C3:  BSF    03.5
+02C4:  BCF    05.6
+02C5:  BCF    03.5
+02C6:  BCF    05.6
+....................    delay_us (1);// en datasheet pone mantener durante 100ns (=0.01us), no se por que ponia reset chip during >= 250ms en la libreria original    
+02C7:  NOP
+....................    #ifDef LCD_rst high_LCD_rst;#endIf 
+02C8:  BSF    03.5
+02C9:  BCF    05.6
+02CA:  BCF    03.5
+02CB:  BSF    05.6
+....................     
+....................    high_LCD_dc; 
+02CC:  BSF    03.5
+02CD:  BCF    05.7
+02CE:  BCF    03.5
+02CF:  BSF    05.7
+....................    #ifDef LCD_cs high_LCD_cs;#endIf 
+....................     
+....................    int8 aux=0b000100001;// Function set. Chip On,modo direccionamiento horizontal/vertical, entrar en modo instrucciones extendidas 
+02D0:  MOVLW  21
+02D1:  MOVWF  4B
+....................    #ifDef  LCD_USE_VERTICAL_ADDR aux=aux| LCD_USE_VERTICAL_ADDR; #endIf 
+....................    LCD_write_command(aux); 
+02D2:  MOVF   4B,W
+02D3:  MOVWF  61
+02D4:  CALL   2BB
+....................     
+....................    LCD_write_command(0b10000000|contraste);//Setear Vop (contraste)//contraste del programa modificado 
+02D5:  MOVF   20,W
+02D6:  IORLW  80
+02D7:  MOVWF  4C
+02D8:  MOVWF  61
+02D9:  CALL   2BB
+....................  
+....................    LCD_write_command(0b00010011);   // bias 
+02DA:  MOVLW  13
+02DB:  MOVWF  61
+02DC:  CALL   2BB
+....................  
+....................    aux=0b000100000;// Function set. Chip On,modo horizontal/vertical, salir del modo instrucciones extendidas 
+02DD:  MOVLW  20
+02DE:  MOVWF  4B
+....................    #ifDef  LCD_USE_VERTICAL_ADDR aux=aux| LCD_USE_VERTICAL_ADDR; #endIf 
+....................    LCD_write_command(aux); 
+02DF:  MOVF   4B,W
+02E0:  MOVWF  61
+02E1:  CALL   2BB
+....................  
+....................    //LCD_write_command(0b00001100);   // modo funcionamiento normal (puede ser allOn,normal,alloff,inverso) 
+....................    //LCD_clear_screen();         // borrar DDRAM para que no inicie con basura en la pantalla 
+.................... } 
+02E2:  GOTO   440 (RETURN)
+....................  
+....................  
+....................  
+....................  
+.................... struct bola 
+.................... { 
+....................    int8 velX; 
+....................    int8 velY; 
+....................    int8 posY; 
+....................    int8 posX; 
+....................    int8 perimetro; 
+.................... }; 
+....................  
+.................... struct pala 
+.................... { 
+....................    int8 velocidad; 
+....................    unsigned int8 posY; 
+....................    unsigned int8 posX; 
+....................    int8 ancho; 
+....................    int8 largo; 
+....................    int8 velIA; 
+.................... }; 
+....................  
+....................  
+....................  
+.................... unsigned int8 dificultad = 1; 
+.................... int1 IA = 0; 
+....................  
+.................... unsigned int8 puntJ1 = 0; 
+....................  
+.................... int8 golpes = 0; 
+.................... int8 velocidadAumentada1; 
+.................... int8 velocidadAumentada2; 
+.................... int8 velocidadInicial; 
+....................  
+.................... unsigned int8 puntJ2 = 0; 
+....................  
+.................... void seteaContraste(); 
+.................... void Actualizar(struct pala &J1, struct pala &J2, struct bola &pelota, unsigned int8 &puntJ1, unsigned int8 &puntJ2); 
+.................... //void Gol(int1 izquierda, struct bola &pelota); 
+....................  
+....................  
+.................... void main() 
+.................... { 
+*
+0408:  CLRF   04
+0409:  BCF    03.7
+040A:  MOVLW  1F
+040B:  ANDWF  03,F
+040C:  BSF    03.5
+040D:  BSF    0E.3
+040E:  MOVLW  46
+040F:  BCF    03.5
+0410:  MOVWF  20
+0411:  MOVLW  01
+0412:  MOVWF  28
+0413:  BCF    29.0
+0414:  CLRF   2A
+0415:  CLRF   2B
+0416:  CLRF   2F
+0417:  MOVLW  07
+0418:  MOVWF  1F
+....................    input(J1_UP);  
+0419:  BSF    03.5
+041A:  BSF    06.3
+....................    input(J1_DOWN);  
+041B:  BSF    06.2
+....................    input(J2_UP);  
+041C:  BSF    06.1
+....................    input(J2_DOWN);  
+041D:  BSF    06.0
+....................  
+....................    //Pines no usados como salidas 
+....................    output_low (PIN_A2); 
+041E:  BCF    05.2
+041F:  BCF    03.5
+0420:  BCF    05.2
+....................    output_low (PIN_A3); 
+0421:  BSF    03.5
+0422:  BCF    05.3
+0423:  BCF    03.5
+0424:  BCF    05.3
+....................    output_low (PIN_A4); 
+0425:  BSF    03.5
+0426:  BCF    05.4
+0427:  BCF    03.5
+0428:  BCF    05.4
+....................    output_low (PIN_B7); 
+0429:  BSF    03.5
+042A:  BCF    06.7
+042B:  BCF    03.5
+042C:  BCF    06.7
+....................    output_low (PIN_B6); 
+042D:  BSF    03.5
+042E:  BCF    06.6
+042F:  BCF    03.5
+0430:  BCF    06.6
+....................    output_low (PIN_B5); 
+0431:  BSF    03.5
+0432:  BCF    06.5
+0433:  BCF    03.5
+0434:  BCF    06.5
+....................    output_low (PIN_B4); 
+0435:  BSF    03.5
+0436:  BCF    06.4
+0437:  BCF    03.5
+0438:  BCF    06.4
+....................  
+....................    port_b_pullups(true); 
+0439:  BSF    03.5
+043A:  BCF    01.7
+....................    delay_ms(50);//estabilizar tensiones  
+043B:  MOVLW  32
+043C:  BCF    03.5
+043D:  MOVWF  5F
+043E:  CALL   287
+....................    
+....................    //----------Primera imagen--------/ 
+....................    //--------------------------------/ 
+....................     
+....................    LCD_init(); 
+043F:  GOTO   2C3
+....................    seteaContraste();            //pone el contraste al 70, valor puesto mas arriba en la variable contraste 
+0440:  GOTO   2E3
+....................    LCD_clear_screen();         // borrar DDRAM para que no inicie con basura en la pantalla 
+0441:  CALL   30E
+....................    LCD_write_command(0b00001100);   // modo funcionamiento normal (puede ser allOn,normal,alloff,inverso) 
+0442:  MOVLW  0C
+0443:  MOVWF  61
+0444:  CALL   2BB
+....................    LCD_gotoxy(0,0); 
+0445:  CLRF   5E
+0446:  CLRF   5F
+0447:  CALL   2F5
+....................    printf(LCD_printchar_inv, "     PONG     "); 
+0448:  CLRF   4B
+0449:  MOVF   4B,W
+044A:  CALL   1F2
+044B:  INCF   4B,F
+044C:  MOVWF  77
+044D:  MOVWF  4C
+044E:  CALL   3B3
+044F:  MOVLW  0E
+0450:  SUBWF  4B,W
+0451:  BTFSS  03.2
+0452:  GOTO   449
+....................    LCD_gotoxy(0,2); 
+0453:  CLRF   5E
+0454:  MOVLW  02
+0455:  MOVWF  5F
+0456:  CALL   2F5
+....................    printf(LCD_printchar, "By Ramon Calvo   Gonzalez"); 
+0457:  CLRF   4B
+0458:  MOVF   4B,W
+0459:  CALL   208
+045A:  INCF   4B,F
+045B:  MOVWF  77
+045C:  MOVWF  60
+045D:  CALL   3B9
+045E:  MOVLW  19
+045F:  SUBWF  4B,W
+0460:  BTFSS  03.2
+0461:  GOTO   458
+....................    delay_ms(2000); 
+0462:  MOVLW  08
+0463:  MOVWF  4B
+0464:  MOVLW  FA
+0465:  MOVWF  5F
+0466:  CALL   287
+0467:  DECFSZ 4B,F
+0468:  GOTO   464
+....................     
+....................    //---------Menu de inicio---------/ 
+....................    //--------------------------------/ 
+....................     
+....................    inicio: 
+....................    puntJ1 = 0; 
+0469:  CLRF   2A
+....................    puntJ2 = 0; 
+046A:  CLRF   2F
+....................    golpes = 0; 
+046B:  CLRF   2B
+....................    dificultad = 1; 
+046C:  MOVLW  01
+046D:  MOVWF  28
+....................    LCD_clear_screen(); 
+046E:  CALL   30E
+....................    LCD_gotoxy(0, 0); 
+046F:  CLRF   5E
+0470:  CLRF   5F
+0471:  CALL   2F5
+....................     
+....................    while (input_state(J1_UP)){   //mientras que el boton arriba no este presionado... 
+0472:  BTFSS  06.3
+0473:  GOTO   4EB
+....................     
+....................      /* LCD_write_data_inv("PONG"); 
+....................       LCD_gotoxy(0,1); 
+....................       LCD_write_data_inv("Facil"); 
+....................       LCD_gotoxy(0,2); 
+....................       LCD_write_data_inv("Medio"); 
+....................       LCD_gotoxy(0,3); 
+....................       LCD_write_data_inv("Dificil");*/ 
+....................        
+....................          LCD_gotoxy(0,0); 
+0474:  CLRF   5E
+0475:  CLRF   5F
+0476:  CALL   2F5
+....................          printf(LCD_printchar_inv, "     PONG     "); 
+0477:  CLRF   4B
+0478:  MOVF   4B,W
+0479:  CALL   1F2
+047A:  INCF   4B,F
+047B:  MOVWF  77
+047C:  MOVWF  4C
+047D:  CALL   3B3
+047E:  MOVLW  0E
+047F:  SUBWF  4B,W
+0480:  BTFSS  03.2
+0481:  GOTO   478
+....................           
+....................          LCD_gotoxy(0,2);  
+0482:  CLRF   5E
+0483:  MOVLW  02
+0484:  MOVWF  5F
+0485:  CALL   2F5
+....................          if (dificultad == 1) 
+0486:  DECFSZ 28,W
+0487:  GOTO   494
+....................             printf(LCD_printchar_inv, "     Facil     "); 
+0488:  CLRF   4B
+0489:  MOVF   4B,W
+048A:  CALL   226
+048B:  INCF   4B,F
+048C:  MOVWF  77
+048D:  MOVWF  4C
+048E:  CALL   3B3
+048F:  MOVLW  0F
+0490:  SUBWF  4B,W
+0491:  BTFSS  03.2
+0492:  GOTO   489
+....................          else 
+0493:  GOTO   49F
+....................             printf(LCD_printchar, "     Facil     "); 
+0494:  CLRF   4B
+0495:  MOVF   4B,W
+0496:  CALL   226
+0497:  INCF   4B,F
+0498:  MOVWF  77
+0499:  MOVWF  60
+049A:  CALL   3B9
+049B:  MOVLW  0F
+049C:  SUBWF  4B,W
+049D:  BTFSS  03.2
+049E:  GOTO   495
+....................              
+....................          LCD_gotoxy(0,3); 
+049F:  CLRF   5E
+04A0:  MOVLW  03
+04A1:  MOVWF  5F
+04A2:  CALL   2F5
+....................          if (dificultad == 2) 
+04A3:  MOVF   28,W
+04A4:  SUBLW  02
+04A5:  BTFSS  03.2
+04A6:  GOTO   4B3
+....................             printf(LCD_printchar_inv, "     Medio     "); 
+04A7:  CLRF   4B
+04A8:  MOVF   4B,W
+04A9:  CALL   23A
+04AA:  INCF   4B,F
+04AB:  MOVWF  77
+04AC:  MOVWF  4C
+04AD:  CALL   3B3
+04AE:  MOVLW  0F
+04AF:  SUBWF  4B,W
+04B0:  BTFSS  03.2
+04B1:  GOTO   4A8
+....................          else 
+04B2:  GOTO   4BE
+....................             printf(LCD_printchar, "     Medio     "); 
+04B3:  CLRF   4B
+04B4:  MOVF   4B,W
+04B5:  CALL   23A
+04B6:  INCF   4B,F
+04B7:  MOVWF  77
+04B8:  MOVWF  60
+04B9:  CALL   3B9
+04BA:  MOVLW  0F
+04BB:  SUBWF  4B,W
+04BC:  BTFSS  03.2
+04BD:  GOTO   4B4
+....................              
+....................          LCD_gotoxy(0,4); 
+04BE:  CLRF   5E
+04BF:  MOVLW  04
+04C0:  MOVWF  5F
+04C1:  CALL   2F5
+....................          if (dificultad == 3) 
+04C2:  MOVF   28,W
+04C3:  SUBLW  03
+04C4:  BTFSS  03.2
+04C5:  GOTO   4D2
+....................             printf(LCD_printchar_inv, "    Dificil   "); 
+04C6:  CLRF   4B
+04C7:  MOVF   4B,W
+04C8:  CALL   24E
+04C9:  INCF   4B,F
+04CA:  MOVWF  77
+04CB:  MOVWF  4C
+04CC:  CALL   3B3
+04CD:  MOVLW  0E
+04CE:  SUBWF  4B,W
+04CF:  BTFSS  03.2
+04D0:  GOTO   4C7
+....................          else 
+04D1:  GOTO   4DD
+....................             printf(LCD_printchar, "    Dificil   "); 
+04D2:  CLRF   4B
+04D3:  MOVF   4B,W
+04D4:  CALL   24E
+04D5:  INCF   4B,F
+04D6:  MOVWF  77
+04D7:  MOVWF  60
+04D8:  CALL   3B9
+04D9:  MOVLW  0E
+04DA:  SUBWF  4B,W
+04DB:  BTFSS  03.2
+04DC:  GOTO   4D3
+....................  
+....................        
+....................           
+....................       //Lee los botones para cambiar la dificultad    
+....................       if (!input_state(J1_DOWN) && (dificultad > 0)) 
+04DD:  BTFSC  06.2
+04DE:  GOTO   4E2
+04DF:  MOVF   28,F
+04E0:  BTFSS  03.2
+....................          dificultad++; 
+04E1:  INCF   28,F
+....................       if (!input_state(J1_DOWN) && (dificultad == 4)) 
+04E2:  BTFSC  06.2
+04E3:  GOTO   4EA
+04E4:  MOVF   28,W
+04E5:  SUBLW  04
+04E6:  BTFSS  03.2
+04E7:  GOTO   4EA
+....................          dificultad = 1; 
+04E8:  MOVLW  01
+04E9:  MOVWF  28
+....................           
+....................       //delay_ms(1); //un respiro 
+....................        
+....................    } 
+04EA:  GOTO   472
+....................     
+....................    //----------------Efecto to chungo de transicion tt-------------------------/ 
+....................    //--------------------------------------------------------------------------/ 
+....................     
+....................    LCD_write_command(0b00001101);  //modo inverso 
+04EB:  MOVLW  0D
+04EC:  MOVWF  61
+04ED:  CALL   2BB
+....................    delay_ms(500); //dejar tiempo para el boton 
+04EE:  MOVLW  02
+04EF:  MOVWF  4B
+04F0:  MOVLW  FA
+04F1:  MOVWF  5F
+04F2:  CALL   287
+04F3:  DECFSZ 4B,F
+04F4:  GOTO   4F0
+....................    LCD_write_command(0b00001100);  //vuelta a la normalidad 
+04F5:  MOVLW  0C
+04F6:  MOVWF  61
+04F7:  CALL   2BB
+....................    LCD_clear_screen(); 
+04F8:  CALL   30E
+....................     
+....................    //--------------Seleccion IA/J2--------------/ 
+....................    //-------------------------------------------/ 
+....................     
+....................    while (input_state(J1_UP)){   //menu de seleccion IA/J2 
+04F9:  BTFSS  06.3
+04FA:  GOTO   54E
+....................     
+....................       LCD_gotoxy(0,0); 
+04FB:  CLRF   5E
+04FC:  CLRF   5F
+04FD:  CALL   2F5
+....................       printf(LCD_printchar_inv, "     PONG     "); 
+04FE:  CLRF   4B
+04FF:  MOVF   4B,W
+0500:  CALL   1F2
+0501:  INCF   4B,F
+0502:  MOVWF  77
+0503:  MOVWF  4C
+0504:  CALL   3B3
+0505:  MOVLW  0E
+0506:  SUBWF  4B,W
+0507:  BTFSS  03.2
+0508:  GOTO   4FF
+....................        
+....................       LCD_gotoxy(0,2); 
+0509:  CLRF   5E
+050A:  MOVLW  02
+050B:  MOVWF  5F
+050C:  CALL   2F5
+....................       if (IA == 0) 
+050D:  BTFSC  29.0
+050E:  GOTO   51B
+....................          printf(LCD_printchar_inv, "      J2      "); 
+050F:  CLRF   4B
+0510:  MOVF   4B,W
+0511:  CALL   261
+0512:  INCF   4B,F
+0513:  MOVWF  77
+0514:  MOVWF  4C
+0515:  CALL   3B3
+0516:  MOVLW  0E
+0517:  SUBWF  4B,W
+0518:  BTFSS  03.2
+0519:  GOTO   510
+....................       else  
+051A:  GOTO   526
+....................          printf(LCD_printchar, "      J2      "); 
+051B:  CLRF   4B
+051C:  MOVF   4B,W
+051D:  CALL   261
+051E:  INCF   4B,F
+051F:  MOVWF  77
+0520:  MOVWF  60
+0521:  CALL   3B9
+0522:  MOVLW  0E
+0523:  SUBWF  4B,W
+0524:  BTFSS  03.2
+0525:  GOTO   51C
+....................        
+....................       LCD_gotoxy(0,3); 
+0526:  CLRF   5E
+0527:  MOVLW  03
+0528:  MOVWF  5F
+0529:  CALL   2F5
+....................       if (IA == 1) 
+052A:  BTFSS  29.0
+052B:  GOTO   538
+....................          printf(LCD_printchar_inv, "      IA      "); 
+052C:  CLRF   4B
+052D:  MOVF   4B,W
+052E:  CALL   274
+052F:  INCF   4B,F
+0530:  MOVWF  77
+0531:  MOVWF  4C
+0532:  CALL   3B3
+0533:  MOVLW  0E
+0534:  SUBWF  4B,W
+0535:  BTFSS  03.2
+0536:  GOTO   52D
+....................       else  
+0537:  GOTO   543
+....................          printf(LCD_printchar, "      IA      "); 
+0538:  CLRF   4B
+0539:  MOVF   4B,W
+053A:  CALL   274
+053B:  INCF   4B,F
+053C:  MOVWF  77
+053D:  MOVWF  60
+053E:  CALL   3B9
+053F:  MOVLW  0E
+0540:  SUBWF  4B,W
+0541:  BTFSS  03.2
+0542:  GOTO   539
+....................           
+....................       //Lee los botones para cambiar el modo    
+....................       if (!input_state(J1_DOWN)) 
+0543:  BTFSC  06.2
+0544:  GOTO   54D
+....................          IA = 1 - IA; 
+0545:  MOVLW  00
+0546:  BTFSC  29.0
+0547:  MOVLW  01
+0548:  SUBLW  01
+0549:  MOVWF  78
+054A:  BCF    29.0
+054B:  BTFSC  78.0
+054C:  BSF    29.0
+....................    } 
+054D:  GOTO   4F9
+....................     
+....................    //--------------------------------/ 
+....................    //---Inicializar los jugadores----/ 
+....................     
+....................    struct pala J1, J2; 
+....................    struct bola pelota; 
+....................     
+....................    switch(dificultad){ 
+054E:  MOVF   28,W
+054F:  XORLW  01
+0550:  BTFSC  03.2
+0551:  GOTO   559
+0552:  XORLW  03
+0553:  BTFSC  03.2
+0554:  GOTO   568
+0555:  XORLW  01
+0556:  BTFSC  03.2
+0557:  GOTO   577
+0558:  GOTO   585
+....................       case 1: 
+....................          J1.largo = LARGO_PALAS_FACIL; 
+0559:  MOVLW  10
+055A:  MOVWF  34
+....................          J2.largo = LARGO_PALAS_FACIL; 
+055B:  MOVWF  3A
+....................          J1.ancho = ANCHO_PALAS_FACIL; 
+055C:  MOVLW  04
+055D:  MOVWF  33
+....................          J2.ancho = ANCHO_PALAS_FACIL;  
+055E:  MOVWF  39
+....................          J2.velIA = VELOCIDAD_IA_FACIL; 
+055F:  MOVLW  01
+0560:  MOVWF  3B
+....................          pelota.perimetro = PERIMETRO_BOLA_FACIL; 
+0561:  MOVLW  06
+0562:  MOVWF  40
+....................          pelota.velX = VELOCIDAD_BOLA_FACIL; 
+0563:  MOVLW  01
+0564:  MOVWF  3C
+....................          pelota.velY = VELOCIDAD_BOLA_FACIL; 
+0565:  MOVWF  3D
+....................          velocidadInicial = VELOCIDAD_BOLA_FACIL; 
+0566:  MOVWF  2E
+....................          break; 
+0567:  GOTO   585
+....................       case 2: 
+....................          J1.largo = LARGO_PALAS_MEDIO; 
+0568:  MOVLW  0A
+0569:  MOVWF  34
+....................          J2.largo = LARGO_PALAS_MEDIO; 
+056A:  MOVWF  3A
+....................          J1.ancho = ANCHO_PALAS_MEDIO; 
+056B:  MOVLW  03
+056C:  MOVWF  33
+....................          J2.ancho = ANCHO_PALAS_MEDIO; 
+056D:  MOVWF  39
+....................          J2.velIA = VELOCIDAD_IA_MEDIO;       
+056E:  MOVLW  02
+056F:  MOVWF  3B
+....................          pelota.perimetro = PERIMETRO_BOLA_MEDIO; 
+0570:  MOVLW  04
+0571:  MOVWF  40
+....................          pelota.velX = VELOCIDAD_BOLA_MEDIO; 
+0572:  MOVLW  02
+0573:  MOVWF  3C
+....................          pelota.velY = VELOCIDAD_BOLA_MEDIO; 
+0574:  MOVWF  3D
+....................          velocidadInicial = VELOCIDAD_BOLA_MEDIO; 
+0575:  MOVWF  2E
+....................          break; 
+0576:  GOTO   585
+....................       case 3: 
+....................          J1.largo = LARGO_PALAS_DIFICIL; 
+0577:  MOVLW  05
+0578:  MOVWF  34
+....................          J2.largo = LARGO_PALAS_DIFICIL; 
+0579:  MOVWF  3A
+....................          J1.ancho = ANCHO_PALAS_DIFICIL; 
+057A:  MOVLW  03
+057B:  MOVWF  33
+....................          J2.ancho = ANCHO_PALAS_DIFICIL; 
+057C:  MOVWF  39
+....................          J2.velIA = VELOCIDAD_IA_DIFICIL; 
+057D:  MOVLW  04
+057E:  MOVWF  3B
+....................          pelota.perimetro = PERIMETRO_BOLA_DIFICIL; 
+057F:  MOVLW  03
+0580:  MOVWF  40
+....................          pelota.velX = VELOCIDAD_BOLA_DIFICIL; 
+0581:  MOVWF  3C
+....................          pelota.velY = VELOCIDAD_BOLA_DIFICIL; 
+0582:  MOVWF  3D
+....................          velocidadInicial = VELOCIDAD_BOLA_DIFICIL; 
+0583:  MOVWF  2E
+....................          break; 
+0584:  GOTO   585
+....................    } 
+....................     
+....................    //Crear las siferentes velocidades 
+....................    velocidadAumentada1 = pelota.velX + 1; 
+0585:  MOVLW  01
+0586:  ADDWF  3C,W
+0587:  MOVWF  2C
+....................    velocidadAumentada2 = pelota.velX + 2; 
+0588:  MOVLW  02
+0589:  ADDWF  3C,W
+058A:  MOVWF  2D
+....................     
+....................    //J1.ancho = 4;  // definida mas arriba 
+....................    J1.velocidad = VELOCIDAD_PALAS; 
+058B:  MOVLW  03
+058C:  MOVWF  30
+....................    J1.posX = 0; 
+058D:  CLRF   32
+....................    J1.posY = 23 - (J1.largo/2); 
+058E:  BCF    03.0
+058F:  RRF    34,W
+0590:  SUBLW  17
+0591:  MOVWF  31
+....................    //J2.ancho = 4; // definida mas arriba 
+....................    J2.velocidad = VELOCIDAD_PALAS; 
+0592:  MOVLW  03
+0593:  MOVWF  36
+....................    J2.posX = 83 - J2.ancho; 
+0594:  MOVF   39,W
+0595:  SUBLW  53
+0596:  MOVWF  38
+....................    J2.posY = 23 - (J2.largo/2); 
+0597:  BCF    03.0
+0598:  RRF    3A,W
+0599:  SUBLW  17
+059A:  MOVWF  37
+....................    pelota.posX = 42 - (pelota.perimetro/2); 
+059B:  BCF    03.0
+059C:  RRF    40,W
+059D:  SUBLW  2A
+059E:  MOVWF  3F
+....................    pelota.posY = 24 - (pelota.perimetro/2); 
+059F:  BCF    03.0
+05A0:  RRF    40,W
+05A1:  SUBLW  18
+05A2:  MOVWF  3E
+....................     
+....................     
+....................    LCD_write_command(0b00001101);  //modo inverso 
+05A3:  MOVLW  0D
+05A4:  MOVWF  61
+05A5:  CALL   2BB
+....................    delay_ms(500); //dejar tiempo para el boton 
+05A6:  MOVLW  02
+05A7:  MOVWF  4B
+05A8:  MOVLW  FA
+05A9:  MOVWF  5F
+05AA:  CALL   287
+05AB:  DECFSZ 4B,F
+05AC:  GOTO   5A8
+....................    LCD_write_command(0b00001100);  //vuelta a la normalidad 
+05AD:  MOVLW  0C
+05AE:  MOVWF  61
+05AF:  CALL   2BB
+....................    LCD_clear_screen(); 
+05B0:  CALL   30E
+....................     
+....................   // unsigned int8 puntJugUno = 0; 
+....................   // unsigned int8 puntJugUno = 0; 
+....................     
+....................    //Dar a la pelota una velocidad inicial 
+....................    pelota.velX = 1; 
+05B1:  MOVLW  01
+05B2:  MOVWF  3C
+....................    pelota.velY = 1; 
+05B3:  MOVWF  3D
+....................  
+....................    while (true) 
+....................    {   
+....................       //---------------------------------------------------------------------------------------------------------------------------// 
+....................       //---------------------------------------------------------------------------------------------------------------------------// 
+....................       //-------------------------------------En este punto el juego ya ha empezado-------------------------------------------------// 
+....................       //---------------------------------------------------------------------------------------------------------------------------// 
+....................       //---------------------------------------------------------------------------------------------------------------------------//       
+....................        
+....................        
+....................       //---------------------------------------------------------------------// 
+....................       Actualizar(J1, J2, pelota, puntJ1, puntJ2);  //actualiza el estado del juego 
+....................        
+....................       //Comprobar si alguien ha ganado 
+....................       if ((puntJ1 > 6) || (puntJ2 > 6)) 
+*
+0727:  MOVF   2A,W
+0728:  SUBLW  06
+0729:  BTFSS  03.0
+072A:  GOTO   72E
+072B:  MOVF   2F,W
+072C:  SUBLW  06
+072D:  BTFSS  03.0
+....................          goto inicio; 
+072E:  GOTO   469
+....................        
+....................           
+....................       //---------------------------------------------------------------------// 
+....................       //----------------------Refrescar pantalla-----------------------------// 
+....................        
+....................       LCD_gotoxy(0,0); 
+072F:  CLRF   5E
+0730:  CLRF   5F
+0731:  CALL   2F5
+....................   
+....................       int y; 
+....................       int x; 
+....................   
+....................       for (y = 0; y < 6; y++){ 
+0732:  CLRF   41
+0733:  MOVF   41,W
+0734:  SUBLW  05
+0735:  BTFSS  03.0
+0736:  GOTO   7CB
+....................          for (x = 0; x < 84; x++){ 
+0737:  CLRF   42
+0738:  MOVF   42,W
+0739:  SUBLW  53
+073A:  BTFSS  03.0
+073B:  GOTO   7C9
+....................             int8 pixel = 0x00; 
+....................             int realY = 8 * y; 
+073C:  CLRF   43
+073D:  RLF    41,W
+073E:  MOVWF  44
+073F:  RLF    44,F
+0740:  RLF    44,F
+0741:  MOVLW  F8
+0742:  ANDWF  44,F
+....................              
+....................             //---------------------------PELOTA--------------------------------/ 
+....................             //-----------------------------------------------------------------/ 
+....................             if (x >= pelota.posX && x <= pelota.posX + pelota.perimetro -1 && pelota.posY + pelota.perimetro > realY && pelota.posY < realY + 8){ 
+0743:  MOVF   3F,W
+0744:  SUBWF  42,W
+0745:  BTFSS  03.0
+0746:  GOTO   76E
+0747:  MOVF   40,W
+0748:  ADDWF  3F,W
+0749:  ADDLW  FF
+074A:  SUBWF  42,W
+074B:  BTFSC  03.2
+074C:  GOTO   74F
+074D:  BTFSC  03.0
+074E:  GOTO   76E
+074F:  MOVF   40,W
+0750:  ADDWF  3E,W
+0751:  SUBWF  44,W
+0752:  BTFSC  03.0
+0753:  GOTO   76E
+0754:  MOVLW  08
+0755:  ADDWF  44,W
+0756:  SUBWF  3E,W
+0757:  BTFSC  03.0
+0758:  GOTO   76E
+....................                int8 ballMask = 0x00; 
+....................                int i; 
+0759:  CLRF   45
+....................                for (i = 0; i < realY + 8 - pelota.posY; i++){ 
+075A:  CLRF   46
+075B:  MOVLW  08
+075C:  ADDWF  44,W
+075D:  MOVWF  78
+075E:  MOVF   3E,W
+075F:  SUBWF  78,W
+0760:  SUBWF  46,W
+0761:  BTFSC  03.0
+0762:  GOTO   76C
+....................                   ballMask = ballMask >> 1; 
+0763:  BCF    03.0
+0764:  RRF    45,F
+....................                   if (i < pelota.perimetro){ 
+0765:  MOVF   40,W
+0766:  SUBWF  46,W
+0767:  BTFSC  03.0
+0768:  GOTO   76A
+....................                      ballMask |= 0x80; 
+0769:  BSF    45.7
+....................                   } 
+....................                } 
+076A:  INCF   46,F
+076B:  GOTO   75B
+....................              
+....................                pixel |= ballMask; 
+076C:  MOVF   45,W
+076D:  IORWF  43,F
+....................             } 
+....................              
+....................             //------------------------------J1---------------------------------/ 
+....................             //-----------------------------------------------------------------/ 
+....................             if (x >= J1.posX && x <= J1.posX + J1.ancho -1 && J1.posY + J1.largo > realY && J1.posY < realY +8){ 
+076E:  MOVF   32,W
+076F:  SUBWF  42,W
+0770:  BTFSS  03.0
+0771:  GOTO   799
+0772:  MOVF   33,W
+0773:  ADDWF  32,W
+0774:  ADDLW  FF
+0775:  SUBWF  42,W
+0776:  BTFSC  03.2
+0777:  GOTO   77A
+0778:  BTFSC  03.0
+0779:  GOTO   799
+077A:  MOVF   34,W
+077B:  ADDWF  31,W
+077C:  SUBWF  44,W
+077D:  BTFSC  03.0
+077E:  GOTO   799
+077F:  MOVLW  08
+0780:  ADDWF  44,W
+0781:  SUBWF  31,W
+0782:  BTFSC  03.0
+0783:  GOTO   799
+....................                int8 J1Mask = 0x00; 
+....................                int i; 
+0784:  CLRF   47
+....................                for (i = 0; i < realY + 8 - J1.posY; i++){ 
+0785:  CLRF   48
+0786:  MOVLW  08
+0787:  ADDWF  44,W
+0788:  MOVWF  78
+0789:  MOVF   31,W
+078A:  SUBWF  78,W
+078B:  SUBWF  48,W
+078C:  BTFSC  03.0
+078D:  GOTO   797
+....................                   J1Mask = J1Mask >> 1; 
+078E:  BCF    03.0
+078F:  RRF    47,F
+....................                   if (i < J1.largo){ 
+0790:  MOVF   34,W
+0791:  SUBWF  48,W
+0792:  BTFSC  03.0
+0793:  GOTO   795
+....................                      J1Mask |= 0x80; 
+0794:  BSF    47.7
+....................                   } 
+....................                } 
+0795:  INCF   48,F
+0796:  GOTO   786
+....................                pixel |= J1Mask; 
+0797:  MOVF   47,W
+0798:  IORWF  43,F
+....................             } 
+....................              
+....................             if (x >= J2.posX && x <= J2.posX + J2.ancho -1 && J2.posY + J2.largo > realY && J2.posY < realY +8){ 
+0799:  MOVF   38,W
+079A:  SUBWF  42,W
+079B:  BTFSS  03.0
+079C:  GOTO   7C4
+079D:  MOVF   39,W
+079E:  ADDWF  38,W
+079F:  ADDLW  FF
+07A0:  SUBWF  42,W
+07A1:  BTFSC  03.2
+07A2:  GOTO   7A5
+07A3:  BTFSC  03.0
+07A4:  GOTO   7C4
+07A5:  MOVF   3A,W
+07A6:  ADDWF  37,W
+07A7:  SUBWF  44,W
+07A8:  BTFSC  03.0
+07A9:  GOTO   7C4
+07AA:  MOVLW  08
+07AB:  ADDWF  44,W
+07AC:  SUBWF  37,W
+07AD:  BTFSC  03.0
+07AE:  GOTO   7C4
+....................                int8 J2Mask = 0x00; 
+....................                int i; 
+07AF:  CLRF   49
+....................                for (i = 0; i < realY + 8 - J2.posY; i++){ 
+07B0:  CLRF   4A
+07B1:  MOVLW  08
+07B2:  ADDWF  44,W
+07B3:  MOVWF  78
+07B4:  MOVF   37,W
+07B5:  SUBWF  78,W
+07B6:  SUBWF  4A,W
+07B7:  BTFSC  03.0
+07B8:  GOTO   7C2
+....................                   J2Mask = J2Mask >> 1; 
+07B9:  BCF    03.0
+07BA:  RRF    49,F
+....................                   if (i < J2.largo){ 
+07BB:  MOVF   3A,W
+07BC:  SUBWF  4A,W
+07BD:  BTFSC  03.0
+07BE:  GOTO   7C0
+....................                      J2Mask |= 0x80; 
+07BF:  BSF    49.7
+....................                   } 
+....................                } 
+07C0:  INCF   4A,F
+07C1:  GOTO   7B1
+....................                pixel |= J2Mask; 
+07C2:  MOVF   49,W
+07C3:  IORWF  43,F
+....................             }             
+....................              
+....................             LCD_write_data(pixel); 
+07C4:  MOVF   43,W
+07C5:  MOVWF  62
+07C6:  CALL   306
+....................          } 
+07C7:  INCF   42,F
+07C8:  GOTO   738
+....................       } 
+07C9:  INCF   41,F
+07CA:  GOTO   733
+....................        
+....................        
+....................    } 
+07CB:  GOTO   5B4
+.................... } 
+....................  
+.................... void seteaContraste() 
+.................... { 
+07CC:  SLEEP
+....................    LCD_setContrast(contraste); 
+*
+02E3:  MOVF   20,W
+02E4:  MOVWF  4B
+.................... } 
+*
+02F4:  GOTO   441 (RETURN)
+....................  
+....................  
+.................... void Actualizar(struct pala &J1, struct pala &J2, struct bola &pelota, unsigned int8 &puntJ1, unsigned int8 &puntJ2) 
+.................... { 
+....................    //--------------------------------------------------------------------// 
+....................    //--------------------Controles del jugador---------------------------// 
+....................    //--------------------------------------------------------------------// 
+....................     
+....................    if ((!input_state(J1_UP))&(J1.posY > 0)){ 
+*
+05B4:  MOVLW  00
+05B5:  BTFSS  06.3
+05B6:  MOVLW  01
+05B7:  MOVWF  4B
+05B8:  MOVF   31,F
+05B9:  BTFSS  03.2
+05BA:  GOTO   5BD
+05BB:  MOVLW  00
+05BC:  GOTO   5BE
+05BD:  MOVLW  01
+05BE:  ANDWF  4B,W
+05BF:  BTFSC  03.2
+05C0:  GOTO   5C3
+....................       J1.posY -= J1.velocidad; 
+05C1:  MOVF   30,W
+05C2:  SUBWF  31,F
+....................    } 
+....................    if ((!input_state(J1_DOWN))&(J1.posY < 47 - J1.largo)){ 
+05C3:  MOVLW  00
+05C4:  BTFSS  06.2
+05C5:  MOVLW  01
+05C6:  MOVWF  4B
+05C7:  MOVF   34,W
+05C8:  SUBLW  2F
+05C9:  SUBWF  31,W
+05CA:  BTFSS  03.0
+05CB:  GOTO   5CE
+05CC:  MOVLW  00
+05CD:  GOTO   5CF
+05CE:  MOVLW  01
+05CF:  ANDWF  4B,W
+05D0:  BTFSC  03.2
+05D1:  GOTO   5D4
+....................       J1.posY += J1.velocidad; 
+05D2:  MOVF   30,W
+05D3:  ADDWF  31,F
+....................    } 
+....................    if (!IA & (!input_state(J2_UP))&(J2.posY > 0)){ 
+05D4:  MOVLW  00
+05D5:  BTFSS  29.0
+05D6:  MOVLW  01
+05D7:  MOVWF  4B
+05D8:  MOVLW  00
+05D9:  BTFSS  06.1
+05DA:  MOVLW  01
+05DB:  ANDWF  4B,F
+05DC:  MOVF   37,F
+05DD:  BTFSS  03.2
+05DE:  GOTO   5E1
+05DF:  MOVLW  00
+05E0:  GOTO   5E2
+05E1:  MOVLW  01
+05E2:  ANDWF  4B,W
+05E3:  BTFSC  03.2
+05E4:  GOTO   5E7
+....................       J2.posY -= J2.velocidad; 
+05E5:  MOVF   36,W
+05E6:  SUBWF  37,F
+....................    } 
+....................    if (!IA & (!input_state(J2_DOWN))&(J2.posY < 47 - J2.largo)){ 
+05E7:  MOVLW  00
+05E8:  BTFSS  29.0
+05E9:  MOVLW  01
+05EA:  MOVWF  4B
+05EB:  MOVLW  00
+05EC:  BTFSS  06.0
+05ED:  MOVLW  01
+05EE:  ANDWF  4B,F
+05EF:  MOVF   3A,W
+05F0:  SUBLW  2F
+05F1:  SUBWF  37,W
+05F2:  BTFSS  03.0
+05F3:  GOTO   5F6
+05F4:  MOVLW  00
+05F5:  GOTO   5F7
+05F6:  MOVLW  01
+05F7:  ANDWF  4B,W
+05F8:  BTFSC  03.2
+05F9:  GOTO   5FC
+....................       J2.posY += J2.velocidad; 
+05FA:  MOVF   36,W
+05FB:  ADDWF  37,F
+....................    } 
+....................     
+....................    //--------------------------------------------------------------------// 
+....................    //-----------------------------IA-------------------------------------// 
+....................    //--------------------------------------------------------------------// 
+....................     
+....................    if (IA){ 
+05FC:  BTFSS  29.0
+05FD:  GOTO   610
+....................       if (pelota.velX > 0){   //si la pelota viene hacia el... 
+05FE:  MOVF   3C,F
+05FF:  BTFSC  03.2
+0600:  GOTO   610
+....................          if (pelota.posY < J2.posY){    //si la pelota esta por encima 
+0601:  MOVF   37,W
+0602:  SUBWF  3E,W
+0603:  BTFSC  03.0
+0604:  GOTO   607
+....................             J2.posY -= J2.velIA; 
+0605:  MOVF   3B,W
+0606:  SUBWF  37,F
+....................          } 
+....................           
+....................          if (pelota.posY > J2.posY + J2.largo){      //si la pelota esta por debajo 
+0607:  MOVF   3A,W
+0608:  ADDWF  37,W
+0609:  SUBWF  3E,W
+060A:  BTFSC  03.2
+060B:  GOTO   610
+060C:  BTFSS  03.0
+060D:  GOTO   610
+....................             J2.posY += J2.velIA; 
+060E:  MOVF   3B,W
+060F:  ADDWF  37,F
+....................          }    
+....................       } 
+....................    } 
+....................     
+....................    //--------------------------------------------------------------------// 
+....................    //-----------Actualizar la posicion de la pelota----------------------// 
+....................    //--------------------------------------------------------------------// 
+....................     
+....................    pelota.posX += pelota.velX; 
+0610:  MOVF   3C,W
+0611:  ADDWF  3F,F
+....................    pelota.posY += pelota.velY; 
+0612:  MOVF   3D,W
+0613:  ADDWF  3E,F
+....................     
+....................     
+....................    //--------------------------------------------------------------------// 
+....................    //--------------------Mirar las colisiones----------------------------// 
+....................    //--------------------------------------------------------------------//    
+....................     
+....................    //Colisiones con los bordes 
+....................     
+....................    //Bordes arriba/abajo 
+....................    if (pelota.posY <= 1){ 
+0614:  MOVF   3E,W
+0615:  SUBLW  01
+0616:  BTFSS  03.0
+0617:  GOTO   620
+....................       pelota.velY = pelota.velY * -1; 
+0618:  MOVF   3D,W
+0619:  MOVWF  64
+061A:  MOVLW  FF
+061B:  MOVWF  65
+061C:  CALL   324
+061D:  MOVF   78,W
+061E:  MOVWF  3D
+....................    } 
+....................    else if (pelota.posY >= 48 - pelota.perimetro){ 
+061F:  GOTO   62C
+0620:  MOVF   40,W
+0621:  SUBLW  30
+0622:  SUBWF  3E,W
+0623:  BTFSS  03.0
+0624:  GOTO   62C
+....................       pelota.velY = pelota.velY * -1; 
+0625:  MOVF   3D,W
+0626:  MOVWF  64
+0627:  MOVLW  FF
+0628:  MOVWF  65
+0629:  CALL   324
+062A:  MOVF   78,W
+062B:  MOVWF  3D
+....................    }    
+....................     
+....................    //Bordes  laterales 
+....................    if (pelota.posX > 83/* && (pelota.velX > 0)*/){ 
+062C:  MOVF   3F,W
+062D:  SUBLW  53
+062E:  BTFSC  03.0
+062F:  GOTO   67C
+....................        
+....................       //Resetear golpes 
+....................       golpes = 0; 
+0630:  CLRF   2B
+....................       puntJ1 += 1; 
+0631:  MOVLW  01
+0632:  ADDWF  2A,F
+....................        
+....................       pelota.velX = velocidadInicial; 
+0633:  MOVF   2E,W
+0634:  MOVWF  3C
+....................       pelota.velY = velocidadInicial; 
+0635:  MOVF   2E,W
+0636:  MOVWF  3D
+....................        
+....................       LCD_gotoxy (30, 0); 
+0637:  MOVLW  1E
+0638:  MOVWF  5E
+0639:  CLRF   5F
+063A:  CALL   2F5
+....................       printf(LCD_printchar, "%u", puntJ1); 
+063B:  MOVF   2A,W
+063C:  MOVWF  5E
+063D:  MOVLW  1B
+063E:  MOVWF  5F
+063F:  CALL   3D3
+....................       LCD_gotoxy (48, 0); 
+0640:  MOVLW  30
+0641:  MOVWF  5E
+0642:  CLRF   5F
+0643:  CALL   2F5
+....................       printf(LCD_printchar, "%u", puntJ2); 
+0644:  MOVF   2F,W
+0645:  MOVWF  5E
+0646:  MOVLW  1B
+0647:  MOVWF  5F
+0648:  CALL   3D3
+....................     
+....................       LCD_write_command(0b00001100);  //vuelta a la normalidad 
+0649:  MOVLW  0C
+064A:  MOVWF  61
+064B:  CALL   2BB
+....................       delay_ms(500); 
+064C:  MOVLW  02
+064D:  MOVWF  4B
+064E:  MOVLW  FA
+064F:  MOVWF  5F
+0650:  CALL   287
+0651:  DECFSZ 4B,F
+0652:  GOTO   64E
+....................       LCD_write_command(0b00001101);  //modo inverso 
+0653:  MOVLW  0D
+0654:  MOVWF  61
+0655:  CALL   2BB
+....................       delay_ms(500); //dejar tiempo para el boton 
+0656:  MOVLW  02
+0657:  MOVWF  4B
+0658:  MOVLW  FA
+0659:  MOVWF  5F
+065A:  CALL   287
+065B:  DECFSZ 4B,F
+065C:  GOTO   658
+....................       LCD_write_command(0b00001100);  //vuelta a la normalidad 
+065D:  MOVLW  0C
+065E:  MOVWF  61
+065F:  CALL   2BB
+....................       delay_ms(500); 
+0660:  MOVLW  02
+0661:  MOVWF  4B
+0662:  MOVLW  FA
+0663:  MOVWF  5F
+0664:  CALL   287
+0665:  DECFSZ 4B,F
+0666:  GOTO   662
+....................       LCD_write_command(0b00001101);  //modo inverso 
+0667:  MOVLW  0D
+0668:  MOVWF  61
+0669:  CALL   2BB
+....................       delay_ms(500); //dejar tiempo para el boton 
+066A:  MOVLW  02
+066B:  MOVWF  4B
+066C:  MOVLW  FA
+066D:  MOVWF  5F
+066E:  CALL   287
+066F:  DECFSZ 4B,F
+0670:  GOTO   66C
+....................       LCD_write_command(0b00001100);  //vuelta a la normalidad 
+0671:  MOVLW  0C
+0672:  MOVWF  61
+0673:  CALL   2BB
+....................        
+....................       //Devuelve la pelota el centro del campo 
+....................       pelota.posX = 42 - (pelota.perimetro/2); 
+0674:  BCF    03.0
+0675:  RRF    40,W
+0676:  SUBLW  2A
+0677:  MOVWF  3F
+....................       pelota.posY = 24 - (pelota.perimetro/2);  
+0678:  BCF    03.0
+0679:  RRF    40,W
+067A:  SUBLW  18
+067B:  MOVWF  3E
+....................    } 
+....................     
+....................     
+....................    if ((pelota.posX <= 0)/* && ((-pelota.velX) > 0)*/){ 
+067C:  MOVF   3F,F
+067D:  BTFSS  03.2
+067E:  GOTO   6CB
+....................     
+....................       //Resetear golpes 
+....................       golpes = 0; 
+067F:  CLRF   2B
+....................       puntJ2 += 1; 
+0680:  MOVLW  01
+0681:  ADDWF  2F,F
+....................        
+....................       pelota.velX = velocidadInicial; 
+0682:  MOVF   2E,W
+0683:  MOVWF  3C
+....................       pelota.velY = velocidadInicial; 
+0684:  MOVF   2E,W
+0685:  MOVWF  3D
+....................        
+....................       LCD_gotoxy (30, 0); 
+0686:  MOVLW  1E
+0687:  MOVWF  5E
+0688:  CLRF   5F
+0689:  CALL   2F5
+....................       printf(LCD_printchar, "%u", puntJ1); 
+068A:  MOVF   2A,W
+068B:  MOVWF  5E
+068C:  MOVLW  1B
+068D:  MOVWF  5F
+068E:  CALL   3D3
+....................       LCD_gotoxy (54, 0); 
+068F:  MOVLW  36
+0690:  MOVWF  5E
+0691:  CLRF   5F
+0692:  CALL   2F5
+....................       printf(LCD_printchar, "%u", puntJ2); 
+0693:  MOVF   2F,W
+0694:  MOVWF  5E
+0695:  MOVLW  1B
+0696:  MOVWF  5F
+0697:  CALL   3D3
+....................     
+....................       LCD_write_command(0b00001100);  //vuelta a la normalidad 
+0698:  MOVLW  0C
+0699:  MOVWF  61
+069A:  CALL   2BB
+....................       delay_ms(500); 
+069B:  MOVLW  02
+069C:  MOVWF  4B
+069D:  MOVLW  FA
+069E:  MOVWF  5F
+069F:  CALL   287
+06A0:  DECFSZ 4B,F
+06A1:  GOTO   69D
+....................       LCD_write_command(0b00001101);  //modo inverso 
+06A2:  MOVLW  0D
+06A3:  MOVWF  61
+06A4:  CALL   2BB
+....................       delay_ms(500); //dejar tiempo para el boton 
+06A5:  MOVLW  02
+06A6:  MOVWF  4B
+06A7:  MOVLW  FA
+06A8:  MOVWF  5F
+06A9:  CALL   287
+06AA:  DECFSZ 4B,F
+06AB:  GOTO   6A7
+....................       LCD_write_command(0b00001100);  //vuelta a la normalidad 
+06AC:  MOVLW  0C
+06AD:  MOVWF  61
+06AE:  CALL   2BB
+....................       delay_ms(500); 
+06AF:  MOVLW  02
+06B0:  MOVWF  4B
+06B1:  MOVLW  FA
+06B2:  MOVWF  5F
+06B3:  CALL   287
+06B4:  DECFSZ 4B,F
+06B5:  GOTO   6B1
+....................       LCD_write_command(0b00001101);  //modo inverso 
+06B6:  MOVLW  0D
+06B7:  MOVWF  61
+06B8:  CALL   2BB
+....................       delay_ms(500); //dejar tiempo para el boton 
+06B9:  MOVLW  02
+06BA:  MOVWF  4B
+06BB:  MOVLW  FA
+06BC:  MOVWF  5F
+06BD:  CALL   287
+06BE:  DECFSZ 4B,F
+06BF:  GOTO   6BB
+....................       LCD_write_command(0b00001100);  //vuelta a la normalidad 
+06C0:  MOVLW  0C
+06C1:  MOVWF  61
+06C2:  CALL   2BB
+....................        
+....................       //Devuelve la pelota el centro del campo 
+....................       pelota.posX = 42 - (pelota.perimetro/2); 
+06C3:  BCF    03.0
+06C4:  RRF    40,W
+06C5:  SUBLW  2A
+06C6:  MOVWF  3F
+....................       pelota.posY = 24 - (pelota.perimetro/2);      
+06C7:  BCF    03.0
+06C8:  RRF    40,W
+06C9:  SUBLW  18
+06CA:  MOVWF  3E
+....................    } 
+....................     
+....................  
+....................    //Colisiones con las barras 
+....................     
+....................    //J1                          //Comprobar eje Y                                                                //Comprobar eje X 
+....................    if (pelota.posY >= J1.posY - pelota.perimetro && pelota.posY <= J1.posY + J1.largo + pelota.perimetro && pelota.posX <= J1.posX + J1.ancho){  
+06CB:  MOVF   40,W
+06CC:  SUBWF  31,W
+06CD:  SUBWF  3E,W
+06CE:  BTFSS  03.0
+06CF:  GOTO   6F7
+06D0:  MOVF   34,W
+06D1:  ADDWF  31,W
+06D2:  ADDWF  40,W
+06D3:  SUBWF  3E,W
+06D4:  BTFSC  03.2
+06D5:  GOTO   6D8
+06D6:  BTFSC  03.0
+06D7:  GOTO   6F7
+06D8:  MOVF   33,W
+06D9:  ADDWF  32,W
+06DA:  SUBWF  3F,W
+06DB:  BTFSC  03.2
+06DC:  GOTO   6DF
+06DD:  BTFSC  03.0
+06DE:  GOTO   6F7
+....................       pelota.velX = -pelota.velX; 
+06DF:  COMF   3C,F
+06E0:  INCF   3C,F
+....................       golpes += 1; 
+06E1:  MOVLW  01
+06E2:  ADDWF  2B,F
+....................  
+....................       if (golpes == 5){ 
+06E3:  MOVF   2B,W
+06E4:  SUBLW  05
+06E5:  BTFSS  03.2
+06E6:  GOTO   6E9
+....................                pelota.velX = velocidadAumentada1; 
+06E7:  MOVF   2C,W
+06E8:  MOVWF  3C
+....................       } 
+....................        
+....................       if (golpes == 10){ 
+06E9:  MOVF   2B,W
+06EA:  SUBLW  0A
+06EB:  BTFSS  03.2
+06EC:  GOTO   6EF
+....................                pelota.velY = velocidadAumentada1; 
+06ED:  MOVF   2C,W
+06EE:  MOVWF  3D
+....................       } 
+....................        
+....................       if (golpes == 15){ 
+06EF:  MOVF   2B,W
+06F0:  SUBLW  0F
+06F1:  BTFSS  03.2
+06F2:  GOTO   6F7
+....................          pelota.velX = velocidadAumentada2; 
+06F3:  MOVF   2D,W
+06F4:  MOVWF  3C
+....................          pelota.velY = velocidadAumentada2;  
+06F5:  MOVF   2D,W
+06F6:  MOVWF  3D
+....................       } 
+....................    } 
+....................     
+....................    //J2 
+....................    if (pelota.posY >= J2.posY && pelota.posY <= J2.posY + J2.largo + pelota.perimetro && pelota.posX >= J2.posX - pelota.perimetro){ 
+06F7:  MOVF   37,W
+06F8:  SUBWF  3E,W
+06F9:  BTFSS  03.0
+06FA:  GOTO   727
+06FB:  MOVF   3A,W
+06FC:  ADDWF  37,W
+06FD:  ADDWF  40,W
+06FE:  SUBWF  3E,W
+06FF:  BTFSC  03.2
+0700:  GOTO   703
+0701:  BTFSC  03.0
+0702:  GOTO   727
+0703:  MOVF   40,W
+0704:  SUBWF  38,W
+0705:  SUBWF  3F,W
+0706:  BTFSS  03.0
+0707:  GOTO   727
+....................       if (pelota.velX > 0) 
+0708:  MOVF   3C,F
+0709:  BTFSC  03.2
+070A:  GOTO   70D
+....................          pelota.velX = -pelota.velX; 
+070B:  COMF   3C,F
+070C:  INCF   3C,F
+....................       golpes += 1; 
+070D:  MOVLW  01
+070E:  ADDWF  2B,F
+....................        
+....................       if (golpes == 5){ 
+070F:  MOVF   2B,W
+0710:  SUBLW  05
+0711:  BTFSS  03.2
+0712:  GOTO   716
+....................          pelota.velX = -velocidadAumentada1; 
+0713:  COMF   2C,W
+0714:  MOVWF  3C
+0715:  INCF   3C,F
+....................       } 
+....................        
+....................       if (golpes == 10){ 
+0716:  MOVF   2B,W
+0717:  SUBLW  0A
+0718:  BTFSS  03.2
+0719:  GOTO   71D
+....................          pelota.velY = -velocidadAumentada1; 
+071A:  COMF   2C,W
+071B:  MOVWF  3D
+071C:  INCF   3D,F
+....................       } 
+....................        
+....................       if (golpes == 15){ 
+071D:  MOVF   2B,W
+071E:  SUBLW  0F
+071F:  BTFSS  03.2
+0720:  GOTO   727
+....................          pelota.velX = -velocidadAumentada2; 
+0721:  COMF   2D,W
+0722:  MOVWF  3C
+0723:  INCF   3C,F
+....................          pelota.velY = -velocidadAumentada2;  
+0724:  COMF   2D,W
+0725:  MOVWF  3D
+0726:  INCF   3D,F
+....................       } 
+....................        
+....................    } 
+....................     
+....................    //--------------------------------------------------------------------// 
+....................    //-------------Aumentar la velocidad de la pelota---------------------// 
+....................    //--------------------------------------------------------------------//    
+....................     
+....................  
+....................     
+....................   /* if (golpes > 4 && golpes < 10){ 
+....................       if (pelota.velX > 0) 
+....................          pelota.velX = velocidadAumentada1; 
+....................       else  
+....................          pelota.velX = -velocidadAumentada1; 
+....................    } 
+....................     
+....................    if (golpes > 9 && golpes < 15){ 
+....................       if (pelota.velY > 0) 
+....................          pelota.velY = velocidadAumentada1;  
+....................       else  
+....................          pelota.velY = -velocidadAumentada1; 
+....................    } 
+....................  
+....................    if (golpes > 14 && golpes < 20){ 
+....................       if (pelota.velX > 0) 
+....................          pelota.velX = velocidadAumentada2;  
+....................       else  
+....................          pelota.velX = -velocidadAumentada2;       
+....................    } 
+....................     
+....................    if (golpes > 19){ 
+....................       if (pelota.velY > 0) 
+....................          pelota.velY = velocidadAumentada2;  
+....................       else  
+....................          pelota.velY = -velocidadAumentada2;      
+....................    }*/ 
+....................  
+.................... } 
+....................  
+.................... /*void Gol (int1 izquierda, struct bola &pelota) 
+.................... { 
+....................    //Hacer un efecto para que se note el punto 
+....................     
+....................    LCD_write_command(0b00001100);  //vuelta a la normalidad 
+....................    delay_ms(500); 
+....................    LCD_write_command(0b00001101);  //modo inverso 
+....................    delay_ms(500); //dejar tiempo para el boton 
+....................    LCD_write_command(0b00001100);  //vuelta a la normalidad 
+....................    delay_ms(500); 
+....................    LCD_write_command(0b00001101);  //modo inverso 
+....................    delay_ms(500); //dejar tiempo para el boton 
+....................    LCD_write_command(0b00001100);  //vuelta a la normalidad 
+....................     
+....................    //Resetear golpes 
+....................    golpes = 0; 
+....................     
+....................    //Aumenta la puntuación 
+....................    if (!izquierda) 
+....................       puntJ1++; 
+....................    else 
+....................       puntJ2++; 
+....................        
+....................     
+....................    //Devuelve la pelota el centro del campo 
+....................    pelota.posX = 42 - (pelota.perimetro/2); 
+....................    pelota.posY = 24 - (pelota.perimetro/2); 
+.................... }*/ 
+
+Configuration Fuses:
+   Word  1: 3F10   NOWDT PUT NOPROTECT NOBROWNOUT NOMCLR NOLVP INTRC_IO NOCPD

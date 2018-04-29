@@ -1,0 +1,70 @@
+
+ROM used: 2013 (98%)
+          2013 (98%) including unused fragments
+
+          2 Average locations per line
+          6 Average locations per statement
+
+RAM used: 22 (10%) at main() level
+          75 (33%) worst case
+
+Stack used: 5 worst case (out of 8 total available)
+
+Lines Stmts  %   Files
+----- ----- ---  -----
+  588   256  73  tester.c
+   15     0   0  tester.h
+  222     0   0  B:\Archivos de programa\PICC\devices\16F628A.h
+  368    93  27  PCD8544_LCDdriverV1_1.c
+----- -----
+ 1193   349 Total
+
+Page ROM  %  RAM   Vol Diff  Functions:
+---- --- --- ---   --- ----  ----------
+0     21   1   1             @delay_ms1
+0    244  12   0             @const69
+0    250  12   0             @const71
+ Inline        3   348  6.3  LCD_write_data_inv
+0     31   2   3   290  5.8  LCD_write_dorc
+0      8   0   1    42  1.1  LCD_write_data
+0      8   0   1    42  1.1  LCD_write_command
+0     17   1   3   151  3.3  LCD_gotoxy
+0    106   5   3   647  7.6  table_to_LCD
+0     37   2   2             @MUL88
+0      5   0   1    43  1.5  LCD_printchar
+0      6   0   1    43  1.5  LCD_printchar_inv
+0     22   1   2   120  3.4  LCD_clear_screen
+ Inline        3   117  2.3  LCD_setContrast
+0     32   2   1   233  2.1  LCD_init
+0    981  49   1  8803 15.2  MAIN
+0     22   1   0             @const140
+0     30   1   0             @const141
+0     20   1   0             @const144
+0     20   1   0             @const146
+0     19   1   0             @const148
+0     19   1   0             @const151
+0     19   1   0             @const153
+0     18   1   0    16  1.0  seteaContraste
+ Inline       20  5726 11.0  Actualizar
+0     21   1   3             @DIV88
+0     53   3   2             @PRINTF_U_91
+
+Program metrics:
+    Functions               14
+    Statements              349
+    Comments                424
+    Volume (V)              21151
+    Difficilty (D)          65.7
+    Effort to implement (E) 1389757
+    Time to implement (T)   21 hours, 27 minutes
+    Est Delivered Bugs (B)  4
+    Cyclomatic Complexity   56
+    Maintainability (MI)    119
+
+ Segment     Used  Free
+-----------  ----  ----
+00000-00003     4  0  
+00004-007FF  2009  35  
+
+
+

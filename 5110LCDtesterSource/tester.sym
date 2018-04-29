@@ -1,0 +1,139 @@
+004-005 @READ_PROGRAM_MEMORY8.P1
+015     CCP_1
+015     CCP_1_LOW
+016     CCP_1_HIGH
+01F.6   C1OUT
+01F.7   C2OUT
+020     contraste
+021     charsel
+022     charpos
+023     chardata
+024     lcdx
+025     lcdy
+026     byteCount
+027     nbytesToWrite
+028     dificultad
+029.0   IA
+02A     puntJ1
+02B     golpes
+02C     velocidadAumentada1
+02D     velocidadAumentada2
+02E     velocidadInicial
+02F     puntJ2
+030-035 MAIN.J1
+036-03B MAIN.J2
+03C-040 MAIN.pelota
+041     y
+042     x
+043     pixel
+044     realY
+045     ballMask
+046     i
+047     J1Mask
+048     i
+049     J2Mask
+04A     i
+04B     LCD_init.aux
+04B     LCD_setContrast.valor
+04B-04C LCD_clear_screen.n
+04B     MAIN.@SCRATCH1
+04B     Actualizar.@SCRATCH1
+04C     LCD_printchar_inv.cvar
+04C     LCD_setContrast.aux
+04C     LCD_init.@SCRATCH1
+04D     LCD_setContrast.@SCRATCH1
+05E     LCD_gotoxy.xLCD
+05E     @PRINTF_U_91.P1
+05F     @PRINTF_U_91.P1
+05F     LCD_gotoxy.yLCD
+05F     @delay_ms1.P1
+060     @DIV88.P1
+060     LCD_printchar.cvar
+060     LCD_gotoxy.@SCRATCH1
+061     table_to_LCD.mode
+061     LCD_write_command.byteforLCD_command
+061     @DIV88.P1
+062     LCD_write_data_inv.byteforLCD_data_inv
+062     LCD_write_data.byteforLCD_data
+062     table_to_LCD.@SCRATCH1
+062     @DIV88.@SCRATCH1
+063     LCD_write_data_inv.caa
+063     LCD_write_dorc.byteforLCD
+063     table_to_LCD.@SCRATCH2
+064     @MUL88.P1
+064     LCD_write_dorc.caa
+064     LCD_write_data_inv.@SCRATCH1
+065     @MUL88.P1
+065     LCD_write_dorc.@SCRATCH1
+077     @SCRATCH
+078     @SCRATCH
+078     _RETURN_
+079     @SCRATCH
+07A     @SCRATCH
+09B-09C @READ_PROGRAM_MEMORY8.P1
+
+ROM Allocation:
+0287  @delay_ms1
+0004  font5x8t1
+00F8  font5x8t2
+0384  LCD_write_data_inv
+029C  LCD_write_dorc
+0306  LCD_write_data
+02BB  LCD_write_command
+02F5  LCD_gotoxy
+0349  table_to_LCD
+0324  @MUL88
+03B9  LCD_printchar
+03B3  LCD_printchar_inv
+030E  LCD_clear_screen
+02E5  LCD_setContrast
+02C3  LCD_init
+0408  MAIN
+01F2  @const140
+0208  @const141
+0226  @const144
+023A  @const146
+024E  @const148
+0261  @const151
+0274  @const153
+02E3  seteaContraste
+05B4  Actualizar
+03BE  @DIV88
+03D3  @PRINTF_U_91
+0408  @cinit
+0469  inicio
+
+
+User Memory space: 
+
+User Memory space: 
+
+Project Directory:
+    C:\Users\Admin\Desktop\5110LCDtesterSource\
+
+Project Files:
+    tester.c
+    tester.h
+    B:\Archivos de programa\PICC\devices\16F628A.h
+    PCD8544_LCDdriverV1_1.c
+
+Units:
+    C:\Users\Admin\Desktop\5110LCDtesterSource\tester (main)
+
+Compiler Settings:
+    Processor:      PIC16F628A
+    Pointer Size:   16
+    Opt Level:      9
+    Short,Int,Long: UNSIGNED: 1,8,16
+    Float,Double:   32,32
+
+Output Files:
+    Errors:      tester.err
+    Ext Symbols: tester.esym
+    INHX8:       tester.hex
+    Symbols:     tester.sym
+    List:        tester.lst
+    Debug/COFF:  tester.cof
+    Project:     tester.PJT
+    Call Tree:   tester.tre
+    Statistics:  tester.sta

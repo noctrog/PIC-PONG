@@ -1,0 +1,15 @@
+*** Error 18 "B:\Documentos\Electronica\Proyectos\PONG\tester.h" Line 1(9,20): File can not be opened
+    Not in "C:\Program Files\PICC\devices\16F628A.h"
+    Not in "C:\Program Files\PICC\drivers\16F628A.h"
+    Not in "B:\Documentos\Electronica\Proyectos\PONG\16F628A.h"
+    Not in project "B:\Documentos\Electronica\Proyectos\PONG\16F628A.h"
+*** Error 128 "B:\Documentos\Electronica\Proyectos\PONG\tester.h" Line 3(7,53): A #DEVICE required before this line
+*** Error 128 "B:\Documentos\Electronica\Proyectos\PONG\tester.h" Line 4(7,49): A #DEVICE required before this line
+*** Error 128 "B:\Documentos\Electronica\Proyectos\PONG\tester.h" Line 5(7,61): A #DEVICE required before this line
+*** Error 128 "B:\Documentos\Electronica\Proyectos\PONG\tester.h" Line 6(7,64): A #DEVICE required before this line
+*** Error 128 "B:\Documentos\Electronica\Proyectos\PONG\tester.h" Line 7(7,52): A #DEVICE required before this line
+*** Error 128 "B:\Documentos\Electronica\Proyectos\PONG\tester.h" Line 8(7,94): A #DEVICE required before this line
+*** Error 99 "B:\Documentos\Electronica\Proyectos\PONG\tester.h" Line 10(5,24): Option invalid   No Internal Osc
+*** Error 128 "tester.c" Line 41(9,15): A #DEVICE required before this line
+      9 Errors,  0 Warnings.
+Build Failed.
